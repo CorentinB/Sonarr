@@ -176,6 +176,10 @@ const links = [
       {
         title: 'Status',
         to: '/diag/status'
+      },
+      {
+        title: 'Script Console',
+        to: '/diag/script'
       }
     ]
   }

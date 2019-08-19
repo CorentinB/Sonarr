@@ -14,7 +14,6 @@ class Status extends Component {
   // Render
 
   render() {
-
     return (
       <PageContent title="Diagnostic Status">
         <PageToolbar>

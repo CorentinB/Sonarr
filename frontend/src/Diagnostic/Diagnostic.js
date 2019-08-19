@@ -18,6 +18,11 @@ class Diagnostic extends Component {
           path="/diag/status"
           component={StatusConnector}
         />
+        <Route
+          exact={true}
+          path="/diag/script"
+          component={ScriptConnector}
+        />
 
         {/* Redirect root to status */}
         <Route

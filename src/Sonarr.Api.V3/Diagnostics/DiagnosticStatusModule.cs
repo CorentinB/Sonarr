@@ -1,6 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using Nancy;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Diagnostics;
 using Sonarr.Api.V3;
 using Sonarr.Http.Extensions;
 
@@ -8,13 +10,16 @@ namespace NzbDrone.Api.V3.Diagnostics
 {
     public class DiagnosticStatusModule : SonarrV3Module
     {
+        private readonly IDiagnosticFeatureSwitches _featureSwitches;
         private readonly IMainDatabase _mainDatabase;
         private readonly ILogDatabase _logDatabase;
 
-        public DiagnosticStatusModule(IMainDatabase mainDatabase,
+        public DiagnosticStatusModule(IDiagnosticFeatureSwitches featureSwitches,
+                                      IMainDatabase mainDatabase,
                                       ILogDatabase logDatabase)
             : base("diagnostic")
         {
+            _featureSwitches = featureSwitches;
             _mainDatabase = mainDatabase;
             _logDatabase = logDatabase;
 
@@ -28,7 +33,8 @@ namespace NzbDrone.Api.V3.Diagnostics
                 Process = GetProcessStats(),
                 DatabaseMain = GetDatabaseStats(_mainDatabase),
                 DatabaseLog = GetDatabaseStats(_logDatabase),
-                CommandsExecuted = (long?)null
+                CommandsExecuted = (long?)null,
+                ScriptConsoleEnabled = _featureSwitches.ScriptConsoleEnabled
             };
         }
 

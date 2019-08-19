@@ -81,6 +81,7 @@ import {
   faSignOutAlt as fasSignOutAlt,
   faSitemap as fasSitemap,
   faSpinner as fasSpinner,
+  faStepForward as fasStepForward,
   faSort as fasSort,
   faSortDown as fasSortDown,
   faSortUp as fasSortUp,
@@ -181,6 +182,8 @@ export const REORDER = fasBars;
 export const RSS = fasRss;
 export const SAVE = fasSave;
 export const SCHEDULED = farClock;
+export const SCRIPT_DEBUG = fasStepForward;
+export const SCRIPT_RUN = fasPlay;
 export const SCORE = fasUserPlus;
 export const SEARCH = fasSearch;
 export const SERIES_CONTINUING = fasPlay;
