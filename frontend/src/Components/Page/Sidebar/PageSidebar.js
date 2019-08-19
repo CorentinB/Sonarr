@@ -165,6 +165,19 @@ const links = [
         to: '/system/logs/files'
       }
     ]
+  },
+
+  {
+    iconName: icons.DEBUG,
+    hidden: true,
+    title: 'Diagnostics',
+    to: '/diag/status',
+    children: [
+      {
+        title: 'Status',
+        to: '/diag/status'
+      }
+    ]
   }
 ];
 
@@ -472,6 +485,10 @@ class PageSidebar extends Component {
 
                 const isActiveParent = activeParent === link.to;
                 const hasActiveChild = hasActiveChildLink(link, pathname);
+
+                if (link.hidden && !isActiveParent && !hasActiveChild) {
+                  return null;
+                }
 
                 return (
                   <PageSidebarItem

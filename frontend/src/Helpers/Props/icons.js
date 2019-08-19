@@ -126,6 +126,7 @@ export const CLONE = farClone;
 export const COLLAPSE = fasChevronCircleUp;
 export const COMPUTER = fasDesktop;
 export const DANGER = fasExclamationCircle;
+export const DEBUG = fasBug;
 export const DELETE = fasTrashAlt;
 export const DOWNLOAD = fasDownload;
 export const DOWNLOADED = fasDownload;
