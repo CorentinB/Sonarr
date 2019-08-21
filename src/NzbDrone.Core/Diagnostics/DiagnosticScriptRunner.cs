@@ -277,7 +277,7 @@ namespace NzbDrone.Core.Diagnostics
         private List<string> ResolveNamespaces(string type)
         {
             var types = _assemblies
-                .SelectMany(v => v.GetTypes())
+                .SelectMany(v => v.GetExportedTypes())
                 .Where(v => v.Name == type);
 
             var namespaces = types.Select(v => v.Namespace)
