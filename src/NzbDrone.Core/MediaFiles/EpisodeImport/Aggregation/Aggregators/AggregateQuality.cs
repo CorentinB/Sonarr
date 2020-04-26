@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NLog;
+using NzbDrone.Core.Download;
 using NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augmenters.Quality;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
@@ -19,9 +20,9 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators
             _logger = logger;
         }
 
-        public LocalEpisode Aggregate(LocalEpisode localEpisode, bool otherFiles)
+        public LocalEpisode Aggregate(LocalEpisode localEpisode, DownloadClientItem downloadClientItem, bool otherFiles)
         {
-            var augmentedQualities = _augmentQualities.Select(a => a.AugmentQuality(localEpisode))
+            var augmentedQualities = _augmentQualities.Select(a => a.AugmentQuality(localEpisode, downloadClientItem))
                                                       .Where(a => a != null)
                                                       .OrderBy(a => a.SourceConfidence);
 

@@ -1,3 +1,4 @@
+using NzbDrone.Core.Download;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -5,7 +6,7 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
 {
     public class AugmentQualityFromFileName : IAugmentQuality
     {
-        public AugmentQualityResult AugmentQuality(LocalEpisode localEpisode)
+        public AugmentQualityResult AugmentQuality(LocalEpisode localEpisode, DownloadClientItem downloadClientItem)
         {
             var quality = localEpisode.FileEpisodeInfo?.Quality;
 
