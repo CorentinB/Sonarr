@@ -60,15 +60,24 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators
 
             if (resolutionConfidence == Confidence.MediaInfo)
             {
-                quality.QualityDetectionSource = QualityDetectionSource.MediaInfo;
+                quality.ResolutionDetectionSource = QualityDetectionSource.MediaInfo;
             }
-            else if (sourceConfidence == Confidence.Fallback || resolutionConfidence == Confidence.Fallback)
+            else if (resolutionConfidence == Confidence.Fallback)
             {
-                quality.QualityDetectionSource = QualityDetectionSource.Extension;
+                quality.ResolutionDetectionSource = QualityDetectionSource.Extension;
             }
             else
             {
-                quality.QualityDetectionSource = QualityDetectionSource.Name;
+                quality.ResolutionDetectionSource = QualityDetectionSource.Name;
+            }
+
+            if (sourceConfidence == Confidence.Fallback)
+            {
+                quality.SourceDetectionSource = QualityDetectionSource.Extension;
+            }
+            else
+            {
+                quality.SourceDetectionSource = QualityDetectionSource.Name;
             }
 
             _logger.Debug("Using quality: {0}", quality);

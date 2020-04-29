@@ -1,6 +1,6 @@
-using System.Linq;
 using NzbDrone.Core.Download;
-using NzbDrone.Core.History;
+using NzbDrone.Core.Download.History;
+using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -8,11 +8,11 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
 {
     public class AugmentQualityFromReleaseName : IAugmentQuality
     {
-        private readonly IHistoryService _historyService;
+        private readonly IDownloadHistoryService _downloadHistoryService;
 
-        public AugmentQualityFromReleaseName(IHistoryService historyService)
+        public AugmentQualityFromReleaseName(IDownloadHistoryService downloadHistoryService)
         {
-            _historyService = historyService;
+            _downloadHistoryService = downloadHistoryService;
         }
 
         public AugmentQualityResult AugmentQuality(LocalEpisode localEpisode, DownloadClientItem downloadClientItem)
@@ -23,33 +23,33 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
                 return null;
             }
 
-            var fileQuality = localEpisode.FileEpisodeInfo?.Quality.Quality;
-            var folderQuality = localEpisode.FolderEpisodeInfo?.Quality.Quality;
+            var fileQuality = localEpisode.FileEpisodeInfo?.Quality;
+            var folderQuality = localEpisode.FolderEpisodeInfo?.Quality;
             var localQuality = folderQuality ?? fileQuality;
 
-            // Return early if the file or folder quality is not a television source (preferring the folder over the file)
-            if (localQuality?.Source != QualitySource.Television)
+            // Return early if the file or folder quality source was parsed.
+            if (localQuality?.SourceDetectionSource != QualityDetectionSource.Unknown)
             {
                 return null;
             }
 
-            var history = _historyService.FindByDownloadId(downloadClientItem.DownloadId)
-                                         .OrderByDescending(h => h.Date)
-                                         .FirstOrDefault(h => h.EventType == EpisodeHistoryEventType.Grabbed);
+            var history = _downloadHistoryService.GetLatestGrab(downloadClientItem.DownloadId);
 
             if (history == null)
             {
                 return null;
             }
 
-            var historyQuality = history.Quality.Quality;
+            var historyQuality = QualityParser.ParseQuality(history.SourceTitle);
 
-            // If the quality source is television (which will be the used if the file/folder name doesn't indicate a source) and the
-            // resolution of the file or folder matches the resolution from the indexer then augment using the source from the indexer.
+            // If the resolution was parsed from the name instead of unknown or the extension and it matches the grab history use the source from the grabbed history.
 
-            if (localQuality.Resolution == historyQuality.Resolution)
+            if (localQuality.SourceDetectionSource != QualityDetectionSource.Name &&
+                localQuality.ResolutionDetectionSource == QualityDetectionSource.Name &&
+                historyQuality.ResolutionDetectionSource == QualityDetectionSource.Name &&
+                localQuality.Quality.Resolution == historyQuality.Quality.Resolution)
             {
-                return AugmentQualityResult.SourceOnly(historyQuality.Source, Confidence.Tag);
+                return AugmentQualityResult.SourceOnly(historyQuality.Quality.Source, Confidence.Tag);
             }
 
             return null;

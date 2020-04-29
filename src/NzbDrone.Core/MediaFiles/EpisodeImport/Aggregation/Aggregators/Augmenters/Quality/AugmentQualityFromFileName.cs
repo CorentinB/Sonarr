@@ -15,14 +15,18 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
                 return null;
             }
 
-            var confidence = quality.QualityDetectionSource == QualityDetectionSource.Extension
+            var sourceConfidence = quality.SourceDetectionSource == QualityDetectionSource.Extension
+                ? Confidence.Fallback
+                : Confidence.Tag;
+
+            var resolutionConfidence = quality.ResolutionDetectionSource == QualityDetectionSource.Extension
                 ? Confidence.Fallback
                 : Confidence.Tag;
 
             return new AugmentQualityResult(quality.Quality.Source,
-                                            confidence,
+                                            sourceConfidence,
                                             quality.Quality.Resolution,
-                                            confidence,
+                                            resolutionConfidence,
                                             quality.Revision);
         }
     }

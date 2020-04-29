@@ -72,7 +72,8 @@ namespace NzbDrone.Core.Parser
                 try
                 {
                     result.Quality = MediaFileExtensions.GetQualityForExtension(Path.GetExtension(name));
-                    result.QualityDetectionSource = QualityDetectionSource.Extension;
+                    result.SourceDetectionSource = QualityDetectionSource.Extension;
+                    result.ResolutionDetectionSource= QualityDetectionSource.Extension;
                 }
                 catch (ArgumentException)
                 {
@@ -91,7 +92,10 @@ namespace NzbDrone.Core.Parser
 
             if (RawHDRegex.IsMatch(normalizedName))
             {
+                result.SourceDetectionSource = QualityDetectionSource.Name;
+                result.ResolutionDetectionSource = QualityDetectionSource.Name;
                 result.Quality = Quality.RAWHD;
+
                 return result;
             }
 
@@ -101,8 +105,15 @@ namespace NzbDrone.Core.Parser
             var codecRegex = CodecRegex.Match(normalizedName);
             var remuxMatch = RemuxRegex.IsMatch(normalizedName);
 
+            if (resolution != Resolution.Unknown)
+            {
+                result.ResolutionDetectionSource = QualityDetectionSource.Name;
+            }
+
             if (sourceMatch != null && sourceMatch.Success)
             {
+                result.SourceDetectionSource = QualityDetectionSource.Name;
+
                 if (sourceMatch.Groups["bluray"].Success)
                 {
                     if (codecRegex.Groups["xvid"].Success || codecRegex.Groups["divx"].Success)
@@ -267,6 +278,7 @@ namespace NzbDrone.Core.Parser
 
                     if (HighDefPdtvRegex.IsMatch(normalizedName))
                     {
+                        result.ResolutionDetectionSource = QualityDetectionSource.Name;
                         result.Quality = Quality.HDTV720p;
                         return result;
                     }

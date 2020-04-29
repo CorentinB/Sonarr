@@ -1,5 +1,6 @@
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augmenters.Quality
 {
@@ -14,10 +15,18 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
                 return null;
             }
 
+            var sourceConfidence = quality.SourceDetectionSource == QualityDetectionSource.Unknown
+                ? Confidence.Fallback
+                : Confidence.Tag;
+
+            var resolutionConfidence = quality.ResolutionDetectionSource == QualityDetectionSource.Unknown
+                ? Confidence.Fallback
+                : Confidence.Tag;
+
             return new AugmentQualityResult(quality.Quality.Source,
-                                            Confidence.Tag,
+                                            sourceConfidence,
                                             quality.Quality.Resolution,
-                                            Confidence.Tag,
+                                            resolutionConfidence,
                                             quality.Revision);
         }
     }

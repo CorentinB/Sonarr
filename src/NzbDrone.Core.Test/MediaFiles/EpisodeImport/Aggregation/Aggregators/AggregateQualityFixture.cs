@@ -57,7 +57,8 @@ namespace NzbDrone.Core.Test.MediaFiles.EpisodeImport.Aggregation.Aggregators
 
             var result = Subject.Aggregate(new LocalEpisode(), null, false);
 
-            result.Quality.QualityDetectionSource.Should().Be(QualityDetectionSource.Extension);
+            result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Extension);
+            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Extension);
             result.Quality.Quality.Should().Be(Quality.HDTV720p);
         }
 
@@ -68,7 +69,8 @@ namespace NzbDrone.Core.Test.MediaFiles.EpisodeImport.Aggregation.Aggregators
 
             var result = Subject.Aggregate(new LocalEpisode(), null, false);
 
-            result.Quality.QualityDetectionSource.Should().Be(QualityDetectionSource.Name);
+            result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Name);
+            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Name);
             result.Quality.Quality.Should().Be(Quality.SDTV);
         }
 
@@ -79,7 +81,8 @@ namespace NzbDrone.Core.Test.MediaFiles.EpisodeImport.Aggregation.Aggregators
 
             var result = Subject.Aggregate(new LocalEpisode(), null, false);
 
-            result.Quality.QualityDetectionSource.Should().Be(QualityDetectionSource.MediaInfo);
+            result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Extension);
+            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.MediaInfo);
             result.Quality.Quality.Should().Be(Quality.HDTV1080p);
         }
 
@@ -90,7 +93,8 @@ namespace NzbDrone.Core.Test.MediaFiles.EpisodeImport.Aggregation.Aggregators
 
             var result = Subject.Aggregate(new LocalEpisode(), null, false);
 
-            result.Quality.QualityDetectionSource.Should().Be(QualityDetectionSource.MediaInfo);
+            result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Name);
+            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.MediaInfo);
             result.Quality.Quality.Should().Be(Quality.HDTV1080p);
         }
 
@@ -101,7 +105,8 @@ namespace NzbDrone.Core.Test.MediaFiles.EpisodeImport.Aggregation.Aggregators
 
             var result = Subject.Aggregate(new LocalEpisode(), new DownloadClientItem(), false);
 
-            result.Quality.QualityDetectionSource.Should().Be(QualityDetectionSource.Name);
+            result.Quality.SourceDetectionSource.Should().Be(QualityDetectionSource.Name);
+            result.Quality.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Name);
             result.Quality.Quality.Should().Be(Quality.WEBDL480p);
         }
     }
