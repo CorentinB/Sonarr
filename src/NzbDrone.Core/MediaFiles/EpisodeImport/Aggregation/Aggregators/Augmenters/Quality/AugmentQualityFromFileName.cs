@@ -15,13 +15,13 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
                 return null;
             }
 
-            var sourceConfidence = quality.SourceDetectionSource == QualityDetectionSource.Extension
-                ? Confidence.Fallback
-                : Confidence.Tag;
+            var sourceConfidence = quality.SourceDetectionSource == QualityDetectionSource.Name
+                ? Confidence.Tag
+                : Confidence.Fallback;
 
-            var resolutionConfidence = quality.ResolutionDetectionSource == QualityDetectionSource.Extension
-                ? Confidence.Fallback
-                : Confidence.Tag;
+            var resolutionConfidence = quality.ResolutionDetectionSource == QualityDetectionSource.Name
+                ? Confidence.Tag
+                : Confidence.Fallback;
 
             return new AugmentQualityResult(quality.Quality.Source,
                                             sourceConfidence,

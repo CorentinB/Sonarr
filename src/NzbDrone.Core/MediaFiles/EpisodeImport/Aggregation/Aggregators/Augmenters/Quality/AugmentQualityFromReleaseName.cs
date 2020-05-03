@@ -1,3 +1,4 @@
+using System;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.History;
 using NzbDrone.Core.Parser;
@@ -27,8 +28,14 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
             var folderQuality = localEpisode.FolderEpisodeInfo?.Quality;
             var localQuality = folderQuality ?? fileQuality;
 
-            // Return early if the file or folder quality source was parsed.
-            if (localQuality?.SourceDetectionSource != QualityDetectionSource.Unknown)
+            if (localQuality == null)
+            {
+                return null;
+            }
+
+            // Return early if the file or folder quality source was parsed from the name.
+            if (localQuality.SourceDetectionSource == QualityDetectionSource.Name &&
+                localQuality.ResolutionDetectionSource == QualityDetectionSource.Name)
             {
                 return null;
             }
@@ -42,14 +49,38 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
 
             var historyQuality = QualityParser.ParseQuality(history.SourceTitle);
 
-            // If the resolution was parsed from the name instead of unknown or the extension and it matches the grab history use the source from the grabbed history.
+            // Only return a source and/or resolution if the release name parsing matched via the name and the
+            // local folder/file did not. This way we'll override filenames that don't have the proper source/resolution
+            // with the source/resolution from the release name, but not attempt to override those that do.
 
-            if (localQuality.SourceDetectionSource != QualityDetectionSource.Name &&
-                localQuality.ResolutionDetectionSource == QualityDetectionSource.Name &&
-                historyQuality.ResolutionDetectionSource == QualityDetectionSource.Name &&
-                localQuality.Quality.Resolution == historyQuality.Quality.Resolution)
+            var source = localQuality.SourceDetectionSource != QualityDetectionSource.Name &&
+                         historyQuality.SourceDetectionSource == QualityDetectionSource.Name
+                ? historyQuality.Quality.Source
+                : QualitySource.Unknown;
+
+            var resolution = localQuality.ResolutionDetectionSource != QualityDetectionSource.Name &&
+                              historyQuality.ResolutionDetectionSource == QualityDetectionSource.Name
+                ? historyQuality.Quality.Resolution
+                : (int?)null;
+
+            var revision = historyQuality.SourceDetectionSource == QualityDetectionSource.Name &&
+                           historyQuality.ResolutionDetectionSource == QualityDetectionSource.Name
+                ? historyQuality.Revision
+                : null;
+
+            if (source != QualitySource.Unknown && resolution.HasValue)
             {
-                return AugmentQualityResult.SourceOnly(historyQuality.Quality.Source, Confidence.Tag);
+                return new AugmentQualityResult(source, Confidence.Tag, resolution.Value, Confidence.Tag, revision);
+            }
+
+            if (source != QualitySource.Unknown && !resolution.HasValue)
+            {
+                return AugmentQualityResult.SourceOnly(source, Confidence.Tag);
+            }
+
+            if (source == QualitySource.Unknown && resolution.HasValue)
+            {
+                return AugmentQualityResult.ResolutionOnly(resolution.Value, Confidence.Tag);
             }
 
             return null;

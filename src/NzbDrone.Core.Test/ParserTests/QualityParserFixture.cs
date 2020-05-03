@@ -419,6 +419,16 @@ namespace NzbDrone.Core.Test.ParserTests
             result.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Extension);
         }
 
+        [TestCase("Revolution.S01E02.Chained.Heat.1080p.mkv")]
+        [TestCase("Dexter - S01E01 - Title.720p.avi")]
+        public void should_parse_resolution_from_name_and_source_from_extension(string title)
+        {
+            var result = QualityParser.ParseQuality(title);
+
+            result.SourceDetectionSource.Should().Be(QualityDetectionSource.Extension);
+            result.ResolutionDetectionSource.Should().Be(QualityDetectionSource.Name);
+        }
+
         [TestCase("Series Title S04E87 REPACK 720p HDTV x264 aAF", true)]
         [TestCase("Series.Title.S04E87.REPACK.720p.HDTV.x264-aAF", true)]
         [TestCase("Series.Title.S04E87.PROPER.720p.HDTV.x264-aAF", false)]
