@@ -94,7 +94,7 @@ namespace NzbDrone.Core.Test.MediaFiles.EpisodeImport
         {
             Mocker.GetMock<IAggregationService>()
                   .Setup(s => s.Augment(It.IsAny<LocalEpisode>(), It.IsAny<DownloadClientItem>(), It.IsAny<bool>()))
-                  .Callback<LocalEpisode, bool>((localEpisode, otherFiles) =>
+                  .Callback<LocalEpisode, DownloadClientItem, bool>((localEpisode, downloadClientItem, otherFiles) =>
                   {
                       localEpisode.Episodes = _localEpisode.Episodes;
                   });
