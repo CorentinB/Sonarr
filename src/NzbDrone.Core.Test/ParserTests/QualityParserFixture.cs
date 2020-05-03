@@ -368,6 +368,13 @@ namespace NzbDrone.Core.Test.ParserTests
 
         [TestCase("Dexter - S01E01 - Title [HDTV-1080p]")]
         [TestCase("Saturday.Night.Live.Vintage.S10E09.Eddie.Murphy.The.Honeydrippers.1080i.UPSCALE.HDTV.DD5.1.MPEG2-zebra")]
+        [TestCase("Series.Title.S01E01.Bluray720p")]
+        [TestCase("Series.Title.S01E01.Bluray1080p")]
+        [TestCase("Series.Title.S01E01.Bluray2160p")]
+        [TestCase("Series.Title.S01E01.848x480.dvd")]
+        [TestCase("Series.Title.S01E01.848x480.Bluray")]
+        [TestCase("Series.Title.S01E01.1280x720.Bluray")]
+        [TestCase("Series.Title.S01E01.1920x1080.Bluray")]
         public void should_parse_full_quality_from_name(string title)
         {
             var result = QualityParser.ParseQuality(title);
@@ -377,6 +384,9 @@ namespace NzbDrone.Core.Test.ParserTests
         }
 
         [TestCase("[CR] Sailor Moon - 004 [480p][48CE2D0F]")]
+        [TestCase("Series.Title.S01E01.848x480")]
+        [TestCase("Series.Title.S01E01.1280x720")]
+        [TestCase("Series.Title.S01E01.1920x1080")]
         public void should_parse_resolution_from_name(string title)
         {
             var result = QualityParser.ParseQuality(title);
@@ -387,6 +397,8 @@ namespace NzbDrone.Core.Test.ParserTests
 
         [TestCase("White.Van.Man.2011.S02E01.WS.PDTV.x264-REPACK-TLA")]
         [TestCase("Series.Title.S01E01.Bluray")]
+        [TestCase("Series.Title.S01E01.HD.TV")]
+        [TestCase("Series.Title.S01E01.SD.TV")]
         public void should_parse_source_from_name(string title)
         {
             var result = QualityParser.ParseQuality(title);
