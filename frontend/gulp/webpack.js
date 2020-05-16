@@ -13,6 +13,7 @@ const frontendFolder = path.join(__dirname, '..');
 const srcFolder = path.join(frontendFolder, 'src');
 const isProduction = process.argv.indexOf('--production') > -1;
 const isProfiling = isProduction && process.argv.indexOf('--profile') > -1;
+const inlineWebWorkers = true;
 
 const distFolder = path.resolve(frontendFolder, '..', '_output', uiFolder);
 
@@ -118,10 +119,17 @@ const config = {
     rules: [
       {
         test: /\.worker\.js$/,
+        issuer: {
+          // monaco-editor includes the editor.worker.js in other language workers,
+          // don't use worker-loader in that case
+          exclude: /monaco-editor/
+        },
         use: {
           loader: 'worker-loader',
           options: {
-            name: '[name].js'
+            name: '[name].js',
+            inline: inlineWebWorkers,
+            fallback: !inlineWebWorkers
           }
         }
       },

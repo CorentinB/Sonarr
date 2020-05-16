@@ -16,8 +16,8 @@ function createMapStateToProps() {
       return {
         isStatusPopulated: diag.status.isPopulated,
         isScriptConsoleEnabled: diag.status.item.scriptConsoleEnabled,
-        isExecuting: diag.script.isExecuting,
-        isDebugging: diag.script.isDebugging,
+        isExecuting: diag.script.isExecuting || false,
+        isDebugging: diag.script.isDebugging || false,
         isValidating: diag.script.isValidating,
         code: diag.script.code,
         result: diag.script.result,

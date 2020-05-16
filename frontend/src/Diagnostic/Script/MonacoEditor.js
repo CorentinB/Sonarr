@@ -51,8 +51,8 @@ import 'monaco-editor/esm/vs/language/json/jsonWorker';
 import 'monaco-editor/esm/vs/language/json/jsonMode';
 
 // Create a WebWorker from a blob rather than an url
-import * as EditorWorker from 'worker-loader?inline=true&fallback=false!monaco-editor/esm/vs/editor/editor.worker';
-import * as JsonWorker from 'worker-loader?inline=true&fallback=false!monaco-editor/esm/vs/language/json/json.worker';
+import * as EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker';
+import * as JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker';
 
 self.MonacoEnvironment = {
   getWorker: (moduleId, label) => {
