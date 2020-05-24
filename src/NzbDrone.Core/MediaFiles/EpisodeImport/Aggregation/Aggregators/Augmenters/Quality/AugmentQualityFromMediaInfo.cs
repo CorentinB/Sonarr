@@ -5,6 +5,8 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
 {
     public class AugmentQualityFromMediaInfo : IAugmentQuality
     {
+        public int Order => 4;
+
         public AugmentQualityResult AugmentQuality(LocalEpisode localEpisode, DownloadClientItem downloadClientItem)
         {
             if (localEpisode.MediaInfo == null)

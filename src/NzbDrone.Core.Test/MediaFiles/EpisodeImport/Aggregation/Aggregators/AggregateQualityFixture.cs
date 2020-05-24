@@ -28,6 +28,11 @@ namespace NzbDrone.Core.Test.MediaFiles.EpisodeImport.Aggregation.Aggregators
             _nameAugmenter = new Mock<IAugmentQuality>();
             _releaseNameAugmenter = new Mock<IAugmentQuality>();
 
+            _fileExtensionAugmenter.SetupGet(s => s.Order).Returns(1);
+            _nameAugmenter.SetupGet(s => s.Order).Returns(2);
+            _mediaInfoAugmenter.SetupGet(s => s.Order).Returns(4);
+            _releaseNameAugmenter.SetupGet(s => s.Order).Returns(5);
+
             _mediaInfoAugmenter.Setup(s => s.AugmentQuality(It.IsAny<LocalEpisode>(), It.IsAny<DownloadClientItem>()))
                                .Returns(AugmentQualityResult.ResolutionOnly(1080, Confidence.MediaInfo));
 

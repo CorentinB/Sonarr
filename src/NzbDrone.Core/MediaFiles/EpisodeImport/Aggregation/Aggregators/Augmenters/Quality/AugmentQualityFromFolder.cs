@@ -6,6 +6,8 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Aggregation.Aggregators.Augment
 {
     public class AugmentQualityFromFolder : IAugmentQuality
     {
+        public int Order => 2;
+
         public AugmentQualityResult AugmentQuality(LocalEpisode localEpisode, DownloadClientItem downloadClientItem)
         {
             var quality = localEpisode.FolderEpisodeInfo?.Quality;
