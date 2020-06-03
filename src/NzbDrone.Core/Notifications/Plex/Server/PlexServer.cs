@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentValidation.Results;
+using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Notifications.Plex.PlexTv;
@@ -14,10 +16,20 @@ namespace NzbDrone.Core.Notifications.Plex.Server
         private readonly IPlexServerService _plexServerService;
         private readonly IPlexTvService _plexTvService;
 
-        public PlexServer(IPlexServerService plexServerService, IPlexTvService plexTvService)
+        class PlexUpdateQueue
+        {
+            public Dictionary<int, Series> Pending { get; } = new Dictionary<int, Series>();
+            public bool Refreshing { get; set; }
+        }
+
+        private readonly ICached<PlexUpdateQueue> _pendingSeriesCache;
+
+        public PlexServer(IPlexServerService plexServerService, IPlexTvService plexTvService, ICacheManager cacheManager)
         {
             _plexServerService = plexServerService;
             _plexTvService = plexTvService;
+
+            _pendingSeriesCache = cacheManager.GetCache<PlexUpdateQueue>(GetType(), "pendingSeries");
         }
 
         public override string Link => "https://www.plex.tv/";
@@ -37,7 +49,60 @@ namespace NzbDrone.Core.Notifications.Plex.Server
         {
             if (Settings.UpdateLibrary)
             {
-                _plexServerService.UpdateLibrary(series, Settings);
+                lock (_pendingSeriesCache)
+                {
+                    var queue = _pendingSeriesCache.Get(Settings.Host, () => new PlexUpdateQueue(), TimeSpan.FromDays(1));
+                    queue.Pending[series.Id] = series;
+                }
+            }
+        }
+
+        public override void ProcessQueue()
+        {
+            PlexUpdateQueue queue = null;
+            var refreshing = false;
+            try
+            {
+                lock (_pendingSeriesCache)
+                {
+                    queue = _pendingSeriesCache.Find(Settings.Host);
+                    if (queue == null || queue.Refreshing)
+                    {
+                        return;
+                    }
+                    queue.Refreshing = refreshing = true;
+                    _pendingSeriesCache.Set(Settings.Host, queue, TimeSpan.FromDays(1));
+                }
+
+                while (true)
+                {
+                    List<Series> refreshingSeries;
+                    lock (_pendingSeriesCache)
+                    {
+                        if (queue.Pending.Empty())
+                        {
+                            return;
+                        }
+
+                        refreshingSeries = queue.Pending.Values.ToList();
+                        queue.Pending.Clear();
+                    }
+
+                    if (Settings.UpdateLibrary)
+                    {
+                        _plexServerService.UpdateLibrary(refreshingSeries, Settings);
+                    }
+                }
+            }
+            finally
+            {
+                lock (_pendingSeriesCache)
+                {
+                    if (refreshing && queue != null)
+                    {
+                        queue.Refreshing = false;
+                    }
+                }
             }
         }
 
