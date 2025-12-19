@@ -23,6 +23,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
         Tuple<Series, List<Episode>> GetSeriesInfoByTvdbId(int tvdbId);
         List<Series> SearchForNewSeries(string title);
         int? FindTmdbIdByTvdbId(int tvdbId);
+        List<string> GetAlternateTitles(int tmdbId);
         bool IsConfigured { get; }
     }
 
@@ -237,6 +238,53 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             {
                 _logger.Error(ex, "Unexpected error getting series info from TMDB for ID {0}", tmdbId);
                 throw new TmdbException("Unexpected error communicating with TMDB API", ex);
+            }
+        }
+
+        public List<string> GetAlternateTitles(int tmdbId)
+        {
+            if (tmdbId <= 0)
+            {
+                return new List<string>();
+            }
+
+            try
+            {
+                var httpRequest = _requestBuilder.Create()
+                    .Resource($"tv/{tmdbId}")
+                    .AddQueryParam("append_to_response", "alternative_titles")
+                    .Build();
+
+                httpRequest.AllowAutoRedirect = true;
+                httpRequest.SuppressHttpError = true;
+
+                var httpResponse = ExecuteWithRetry<TmdbTvShowResource>(httpRequest, $"GetAlternateTitles({tmdbId})");
+
+                if (httpResponse.HasHttpError)
+                {
+                    _logger.Warn("Failed to get alternate titles for TMDB ID {0}: HTTP {1}", tmdbId, httpResponse.StatusCode);
+                    return new List<string>();
+                }
+
+                var show = httpResponse.Resource;
+                if (show?.AlternativeTitles?.Results == null)
+                {
+                    return new List<string>();
+                }
+
+                // Get unique alternate titles that differ from the main title
+                var mainTitle = show.Name;
+                return show.AlternativeTitles.Results
+                    .Where(t => t.Title.IsNotNullOrWhiteSpace() &&
+                                !t.Title.Equals(mainTitle, StringComparison.OrdinalIgnoreCase))
+                    .Select(t => t.Title)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Failed to get alternate titles for TMDB ID {0}", tmdbId);
+                return new List<string>();
             }
         }
 

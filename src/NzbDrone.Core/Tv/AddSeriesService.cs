@@ -8,6 +8,7 @@ using NLog;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.DataAugmentation.Scene;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.MetadataSource.Tmdb;
@@ -30,6 +31,7 @@ namespace NzbDrone.Core.Tv
         private readonly IBuildFileNames _fileNameBuilder;
         private readonly IAddSeriesValidator _addSeriesValidator;
         private readonly IConfigService _configService;
+        private readonly ISceneMappingRepository _sceneMappingRepository;
         private readonly Logger _logger;
 
         public AddSeriesService(ISeriesService seriesService,
@@ -38,6 +40,7 @@ namespace NzbDrone.Core.Tv
                                 IBuildFileNames fileNameBuilder,
                                 IAddSeriesValidator addSeriesValidator,
                                 IConfigService configService,
+                                ISceneMappingRepository sceneMappingRepository,
                                 Logger logger)
         {
             _seriesService = seriesService;
@@ -46,6 +49,7 @@ namespace NzbDrone.Core.Tv
             _fileNameBuilder = fileNameBuilder;
             _addSeriesValidator = addSeriesValidator;
             _configService = configService;
+            _sceneMappingRepository = sceneMappingRepository;
             _logger = logger;
         }
 

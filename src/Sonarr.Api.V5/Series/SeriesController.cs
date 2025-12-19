@@ -321,6 +321,12 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
     {
         var mappings = _sceneMappingService.FindByTvdbId(resource.TvdbId);
 
+        // For TMDB-only series (TvdbId=0), also check by TmdbId
+        if ((mappings == null || mappings.Count == 0) && resource.TvdbId == 0 && resource.TmdbId > 0)
+        {
+            mappings = _sceneMappingService.FindByTmdbId(resource.TmdbId);
+        }
+
         if (mappings == null)
         {
             return;
