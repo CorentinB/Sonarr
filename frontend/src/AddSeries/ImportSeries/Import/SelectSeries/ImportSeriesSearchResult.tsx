@@ -21,7 +21,7 @@ function ImportSeriesSearchResult({
   network,
   onPress,
 }: ImportSeriesSearchResultProps) {
-  const isExistingSeries = useExistingSeries(tvdbId);
+  const isExistingSeries = useExistingSeries(tvdbId, undefined);
 
   const handlePress = useCallback(() => {
     onPress(tvdbId);

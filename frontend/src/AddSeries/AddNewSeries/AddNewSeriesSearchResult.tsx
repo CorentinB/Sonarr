@@ -22,6 +22,7 @@ interface AddNewSeriesSearchResultProps {
 function AddNewSeriesSearchResult({ series }: AddNewSeriesSearchResultProps) {
   const {
     tvdbId,
+    tmdbId,
     titleSlug,
     title,
     year,
@@ -36,7 +37,7 @@ function AddNewSeriesSearchResult({ series }: AddNewSeriesSearchResultProps) {
     images,
   } = series;
 
-  const isExistingSeries = useExistingSeries(tvdbId);
+  const isExistingSeries = useExistingSeries(tvdbId, tmdbId);
   const isSmallScreen = useAppDimension('isSmallScreen');
   const [isNewAddSeriesModalOpen, setIsNewAddSeriesModalOpen] = useState(false);
 

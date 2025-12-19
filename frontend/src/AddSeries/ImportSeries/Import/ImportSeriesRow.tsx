@@ -44,7 +44,10 @@ function ImportSeriesRow({ id }: ImportSeriesRowProps) {
     selectedSeries,
   } = useSelector(createItemSelector(id));
 
-  const isExistingSeries = useExistingSeries(selectedSeries?.tvdbId);
+  const isExistingSeries = useExistingSeries(
+    selectedSeries?.tvdbId,
+    selectedSeries?.tmdbId
+  );
 
   const { getIsSelected, toggleSelected, toggleDisabled } =
     useSelect<ImportSeries>();
