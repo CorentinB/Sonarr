@@ -238,10 +238,12 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
 
             var resource = GetSeriesResource(series, false);
 
-            if (resource != null)
+            if (resource == null)
             {
-                BroadcastResourceChange(ModelAction.Updated, resource);
+                return NotFound();
             }
+
+            BroadcastResourceChange(ModelAction.Updated, resource);
 
             return resource;
         }
