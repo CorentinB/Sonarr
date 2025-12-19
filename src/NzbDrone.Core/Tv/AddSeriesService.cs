@@ -57,14 +57,17 @@ namespace NzbDrone.Core.Tv
         {
             Ensure.That(newSeries, () => newSeries).IsNotNull();
 
+            // Track if user added via TMDB search (before we fetch metadata which might fill in TvdbId)
+            var addedFromTmdb = newSeries.TvdbId <= 0 && newSeries.TmdbId > 0;
+
             newSeries = AddSkyhookData(newSeries);
-            newSeries = SetPropertiesAndValidate(newSeries);
+            newSeries = SetPropertiesAndValidate(newSeries, addedFromTmdb);
 
             _logger.Info("Adding Series {0} Path: [{1}]", newSeries, newSeries.Path);
             _seriesService.AddSeries(newSeries);
 
-            // Store TMDB alternate titles for TMDB-only series
-            if (newSeries.TmdbId > 0 && newSeries.TvdbId <= 0)
+            // Store TMDB alternate titles for series added from TMDB
+            if (addedFromTmdb)
             {
                 StoreTmdbAlternateTitles(newSeries);
             }
@@ -76,6 +79,7 @@ namespace NzbDrone.Core.Tv
         {
             var added = DateTime.UtcNow;
             var seriesToAdd = new List<Series>();
+            var seriesAddedFromTmdb = new HashSet<int>(); // Track series added from TMDB by their index
             var existingSeriesTvdbIds = _seriesService.AllSeriesTvdbIds();
             var existingSeriesTmdbIds = _seriesService.AllSeriesTmdbIds();
 
@@ -92,8 +96,11 @@ namespace NzbDrone.Core.Tv
 
                 try
                 {
+                    // Track if user added via TMDB search (before we fetch metadata which might fill in TvdbId)
+                    var addedFromTmdb = s.TvdbId <= 0 && s.TmdbId > 0;
+
                     var series = AddSkyhookData(s);
-                    series = SetPropertiesAndValidate(series);
+                    series = SetPropertiesAndValidate(series, addedFromTmdb);
                     series.Added = added;
 
                     // Only check for duplicate TvdbId if it's a real TVDB ID (> 0)
@@ -131,6 +138,11 @@ namespace NzbDrone.Core.Tv
                         continue;
                     }
 
+                    if (addedFromTmdb)
+                    {
+                        seriesAddedFromTmdb.Add(seriesToAdd.Count);
+                    }
+
                     seriesToAdd.Add(series);
                 }
                 catch (ValidationException ex)
@@ -146,10 +158,13 @@ namespace NzbDrone.Core.Tv
 
             var addedSeries = _seriesService.AddSeries(seriesToAdd);
 
-            // Store TMDB alternate titles for TMDB-only series
-            foreach (var series in addedSeries.Where(s => s.TmdbId > 0 && s.TvdbId <= 0))
+            // Store TMDB alternate titles for series added from TMDB
+            for (var i = 0; i < addedSeries.Count; i++)
             {
-                StoreTmdbAlternateTitles(series);
+                if (seriesAddedFromTmdb.Contains(i))
+                {
+                    StoreTmdbAlternateTitles(addedSeries[i]);
+                }
             }
 
             return addedSeries;
@@ -208,7 +223,7 @@ namespace NzbDrone.Core.Tv
             return series;
         }
 
-        private Series SetPropertiesAndValidate(Series newSeries)
+        private Series SetPropertiesAndValidate(Series newSeries, bool addedFromTmdb = false)
         {
             if (string.IsNullOrWhiteSpace(newSeries.Path))
             {
@@ -221,9 +236,9 @@ namespace NzbDrone.Core.Tv
             newSeries.Added = DateTime.UtcNow;
 
             // Set metadata source:
-            // - TMDB-only series (no TVDB ID) must use TMDB
+            // - Series added from TMDB search use TMDB
             // - Otherwise use TMDB if configured as default
-            if (newSeries.TvdbId <= 0 && newSeries.TmdbId > 0)
+            if (addedFromTmdb)
             {
                 newSeries.MetadataSource = MetadataSource.Tmdb;
             }
