@@ -384,7 +384,8 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                 Title = show.Name,
                 CleanTitle = Parser.Parser.CleanSeriesTitle(show.Name),
                 Overview = show.Overview,
-                Monitored = true
+                Monitored = true,
+                MetadataSource = Tv.MetadataSource.Tmdb
             };
 
             // Set external IDs
