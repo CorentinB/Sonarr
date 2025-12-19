@@ -89,6 +89,9 @@ namespace NzbDrone.Core.MetadataSource.Tmdb.Resource
         [JsonProperty("images")]
         public TmdbImagesResource Images { get; set; }
 
+        [JsonProperty("alternative_titles")]
+        public TmdbAlternativeTitlesResource AlternativeTitles { get; set; }
+
         [JsonProperty("origin_country")]
         public List<string> OriginCountry { get; set; }
 
@@ -208,5 +211,23 @@ namespace NzbDrone.Core.MetadataSource.Tmdb.Resource
 
         [JsonProperty("profile_path")]
         public string ProfilePath { get; set; }
+    }
+
+    public class TmdbAlternativeTitlesResource
+    {
+        [JsonProperty("results")]
+        public List<TmdbAlternativeTitleResource> Results { get; set; }
+    }
+
+    public class TmdbAlternativeTitleResource
+    {
+        [JsonProperty("iso_3166_1")]
+        public string Iso31661 { get; set; }
+
+        [JsonProperty("title")]
+        public string Title { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
     }
 }

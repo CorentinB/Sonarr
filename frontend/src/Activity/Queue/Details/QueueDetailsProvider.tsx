@@ -89,7 +89,10 @@ export function useQueueDetailsForSeries(
           return acc;
         }
 
-        if (seasonNumber != null && item.seasonNumber !== seasonNumber) {
+        if (
+          seasonNumber != null &&
+          !item.seasonNumbers?.includes(seasonNumber)
+        ) {
           return acc;
         }
 

@@ -169,7 +169,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             {
                 var httpRequest = _requestBuilder.Create()
                     .Resource($"tv/{tmdbId}")
-                    .AddQueryParam("append_to_response", "external_ids,content_ratings,credits")
+                    .AddQueryParam("append_to_response", "external_ids,content_ratings,credits,alternative_titles")
                     .Build();
 
                 httpRequest.AllowAutoRedirect = true;

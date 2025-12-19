@@ -45,7 +45,7 @@ namespace Sonarr.Api.V3.Parse
                 };
             }
 
-            var remoteEpisode = _parsingService.Map(parsedEpisodeInfo, 0, 0, null);
+            var remoteEpisode = _parsingService.Map(parsedEpisodeInfo, 0, 0, null, 0);
 
             if (remoteEpisode != null)
             {

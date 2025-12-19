@@ -38,6 +38,7 @@ namespace Sonarr.Api.V5.Queue
         public bool DownloadClientHasPostImportCategory { get; set; }
         public string? Indexer { get; set; }
         public string? OutputPath { get; set; }
+        public bool EpisodeHasFile { get; set; }
         public int EpisodesWithFilesCount { get; set; }
         public bool IsFullSeason { get; set; }
     }
@@ -78,6 +79,7 @@ namespace Sonarr.Api.V5.Queue
                 DownloadClientHasPostImportCategory = model.DownloadClientHasPostImportCategory,
                 Indexer = model.Indexer,
                 OutputPath = model.OutputPath,
+                EpisodeHasFile = model.Episode?.HasFile ?? false,
                 EpisodesWithFilesCount = model.Episodes?.Count(e => e.HasFile) ?? 0,
                 IsFullSeason = model.RemoteEpisode?.ParsedEpisodeInfo?.FullSeason ?? false
             };

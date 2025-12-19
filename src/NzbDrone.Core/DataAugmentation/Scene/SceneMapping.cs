@@ -12,6 +12,7 @@ namespace NzbDrone.Core.DataAugmentation.Scene
         public string SearchTerm { get; set; }
 
         public int TvdbId { get; set; }
+        public int TmdbId { get; set; }
 
         [JsonProperty("season")]
         public int? SeasonNumber { get; set; }

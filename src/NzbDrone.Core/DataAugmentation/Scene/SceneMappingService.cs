@@ -17,6 +17,7 @@ namespace NzbDrone.Core.DataAugmentation.Scene
         List<string> GetSceneNames(int tvdbId, List<int> seasonNumbers, List<int> sceneSeasonNumbers);
         int? FindTvdbId(string sceneTitle, string releaseTitle, int sceneSeasonNumber);
         List<SceneMapping> FindByTvdbId(int tvdbId);
+        List<SceneMapping> FindByTmdbId(int tmdbId);
         SceneMapping FindSceneMapping(string sceneTitle, string releaseTitle, int sceneSeasonNumber);
         int? GetSceneSeasonNumber(string seriesTitle, string releaseTitle);
     }
