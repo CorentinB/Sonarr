@@ -105,6 +105,7 @@ namespace NzbDrone.Core.Parser.Model
                     stringBuilder.AppendLine("TvdbId: " + TvdbId ?? "Empty");
                     stringBuilder.AppendLine("TvRageId: " + TvRageId ?? "Empty");
                     stringBuilder.AppendLine("ImdbId: " + ImdbId ?? "Empty");
+                    stringBuilder.AppendLine("TmdbId: " + TmdbId ?? "Empty");
                     stringBuilder.AppendLine("PublishDate: " + PublishDate ?? "Empty");
                     return stringBuilder.ToString();
                 default:

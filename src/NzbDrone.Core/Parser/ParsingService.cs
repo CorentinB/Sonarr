@@ -14,11 +14,11 @@ namespace NzbDrone.Core.Parser
     public interface IParsingService
     {
         Series GetSeries(string title);
-        RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, int tvdbId, int tvRageId, string imdbId, SearchCriteriaBase searchCriteria = null);
+        RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, int tvdbId, int tvRageId, string imdbId, int tmdbId, SearchCriteriaBase searchCriteria = null);
         RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, Series series);
         RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, int seriesId, IEnumerable<int> episodeIds);
         List<Episode> GetEpisodes(ParsedEpisodeInfo parsedEpisodeInfo, Series series, bool sceneSource, SearchCriteriaBase searchCriteria = null);
-        ParsedEpisodeInfo ParseSpecialEpisodeTitle(ParsedEpisodeInfo parsedEpisodeInfo, string releaseTitle, int tvdbId, int tvRageId, string imdbId, SearchCriteriaBase searchCriteria = null);
+        ParsedEpisodeInfo ParseSpecialEpisodeTitle(ParsedEpisodeInfo parsedEpisodeInfo, string releaseTitle, int tvdbId, int tvRageId, string imdbId, int tmdbId, SearchCriteriaBase searchCriteria = null);
         ParsedEpisodeInfo ParseSpecialEpisodeTitle(ParsedEpisodeInfo parsedEpisodeInfo, string releaseTitle, Series series);
     }
 
@@ -116,14 +116,14 @@ namespace NzbDrone.Core.Parser
             return foundSeries;
         }
 
-        public RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, int tvdbId, int tvRageId, string imdbId, SearchCriteriaBase searchCriteria = null)
+        public RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, int tvdbId, int tvRageId, string imdbId, int tmdbId, SearchCriteriaBase searchCriteria = null)
         {
-            return Map(parsedEpisodeInfo, tvdbId, tvRageId, imdbId, null, searchCriteria);
+            return Map(parsedEpisodeInfo, tvdbId, tvRageId, imdbId, tmdbId, null, searchCriteria);
         }
 
         public RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, Series series)
         {
-            return Map(parsedEpisodeInfo, 0, 0, null, series, null);
+            return Map(parsedEpisodeInfo, 0, 0, null, 0, series, null);
         }
 
         public RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, int seriesId, IEnumerable<int> episodeIds)
@@ -136,7 +136,7 @@ namespace NzbDrone.Core.Parser
                    };
         }
 
-        private RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, int tvdbId, int tvRageId, string imdbId, Series series, SearchCriteriaBase searchCriteria)
+        private RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, int tvdbId, int tvRageId, string imdbId, int tmdbId, Series series, SearchCriteriaBase searchCriteria)
         {
             var sceneMapping = _sceneMappingService.FindSceneMapping(parsedEpisodeInfo.SeriesTitle, parsedEpisodeInfo.ReleaseTitle, parsedEpisodeInfo.SeasonNumber);
 
@@ -172,7 +172,7 @@ namespace NzbDrone.Core.Parser
 
             if (series == null)
             {
-                var seriesMatch = FindSeries(parsedEpisodeInfo, tvdbId, tvRageId, imdbId, sceneMapping, searchCriteria);
+                var seriesMatch = FindSeries(parsedEpisodeInfo, tvdbId, tvRageId, imdbId, tmdbId, sceneMapping, searchCriteria);
 
                 if (seriesMatch != null)
                 {
@@ -211,7 +211,7 @@ namespace NzbDrone.Core.Parser
         {
             if (sceneSource)
             {
-                var remoteEpisode = Map(parsedEpisodeInfo, 0, 0, null, series, searchCriteria);
+                var remoteEpisode = Map(parsedEpisodeInfo, 0, 0, null, 0, series, searchCriteria);
 
                 return remoteEpisode.Episodes;
             }
@@ -273,7 +273,7 @@ namespace NzbDrone.Core.Parser
             return GetStandardEpisodes(series, parsedEpisodeInfo, mappedSeasonNumber, sceneSource, searchCriteria);
         }
 
-        public ParsedEpisodeInfo ParseSpecialEpisodeTitle(ParsedEpisodeInfo parsedEpisodeInfo, string releaseTitle, int tvdbId, int tvRageId, string imdbId, SearchCriteriaBase searchCriteria = null)
+        public ParsedEpisodeInfo ParseSpecialEpisodeTitle(ParsedEpisodeInfo parsedEpisodeInfo, string releaseTitle, int tvdbId, int tvRageId, string imdbId, int tmdbId, SearchCriteriaBase searchCriteria = null)
         {
             if (searchCriteria != null)
             {
@@ -288,6 +288,11 @@ namespace NzbDrone.Core.Parser
                 }
 
                 if (imdbId.IsNotNullOrWhiteSpace() && imdbId.Equals(searchCriteria.Series.ImdbId, StringComparison.Ordinal))
+                {
+                    return ParseSpecialEpisodeTitle(parsedEpisodeInfo, releaseTitle, searchCriteria.Series);
+                }
+
+                if (tmdbId > 0 && tmdbId == searchCriteria.Series.TmdbId)
                 {
                     return ParseSpecialEpisodeTitle(parsedEpisodeInfo, releaseTitle, searchCriteria.Series);
                 }
@@ -313,6 +318,11 @@ namespace NzbDrone.Core.Parser
             if (series == null && imdbId.IsNotNullOrWhiteSpace())
             {
                 series = _seriesService.FindByImdbId(imdbId);
+            }
+
+            if (series == null && tmdbId > 0)
+            {
+                series = _seriesService.FindByTmdbId(tmdbId);
             }
 
             if (series == null)
@@ -365,7 +375,7 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        private FindSeriesResult FindSeries(ParsedEpisodeInfo parsedEpisodeInfo, int tvdbId, int tvRageId, string imdbId, SceneMapping sceneMapping, SearchCriteriaBase searchCriteria)
+        private FindSeriesResult FindSeries(ParsedEpisodeInfo parsedEpisodeInfo, int tvdbId, int tvRageId, string imdbId, int tmdbId, SceneMapping sceneMapping, SearchCriteriaBase searchCriteria)
         {
             Series series = null;
 
@@ -425,6 +435,18 @@ namespace NzbDrone.Core.Parser
                            .Property("ImdbId", imdbId)
                            .Property("ParsedEpisodeInfo", parsedEpisodeInfo)
                            .WriteSentryWarn("ImdbIdMatch", imdbId, parsedEpisodeInfo.SeriesTitle)
+                           .Log();
+
+                    return new FindSeriesResult(searchCriteria.Series, SeriesMatchType.Id);
+                }
+
+                if (tmdbId > 0 && tmdbId == searchCriteria.Series.TmdbId && tvdbId <= 0)
+                {
+                    _logger.ForDebugEvent()
+                           .Message("Found matching series by TMDB ID {0}, an alias may be needed for: {1}", tmdbId, parsedEpisodeInfo.SeriesTitle)
+                           .Property("TmdbId", tmdbId)
+                           .Property("ParsedEpisodeInfo", parsedEpisodeInfo)
+                           .WriteSentryWarn("TmdbIdMatch", tmdbId.ToString(), parsedEpisodeInfo.SeriesTitle)
                            .Log();
 
                     return new FindSeriesResult(searchCriteria.Series, SeriesMatchType.Id);
@@ -496,6 +518,23 @@ namespace NzbDrone.Core.Parser
                            .Property("ImdbId", imdbId)
                            .Property("ParsedEpisodeInfo", parsedEpisodeInfo)
                            .WriteSentryWarn("ImdbIdMatch", imdbId, parsedEpisodeInfo.SeriesTitle)
+                           .Log();
+
+                    matchType = SeriesMatchType.Id;
+                }
+            }
+
+            if (series == null && tmdbId > 0 && tvdbId <= 0)
+            {
+                series = _seriesService.FindByTmdbId(tmdbId);
+
+                if (series != null)
+                {
+                    _logger.ForDebugEvent()
+                           .Message("Found matching series by TMDB ID {0}, an alias may be needed for: {1}", tmdbId, parsedEpisodeInfo.SeriesTitle)
+                           .Property("TmdbId", tmdbId)
+                           .Property("ParsedEpisodeInfo", parsedEpisodeInfo)
+                           .WriteSentryWarn("TmdbIdMatch", tmdbId.ToString(), parsedEpisodeInfo.SeriesTitle)
                            .Log();
 
                     matchType = SeriesMatchType.Id;

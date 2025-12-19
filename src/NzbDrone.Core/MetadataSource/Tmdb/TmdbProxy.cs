@@ -352,7 +352,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
 
             series.Ratings = new Ratings
             {
-                Value = (decimal)result.VoteAverage,
+                Value = Math.Round((decimal)result.VoteAverage, 1),
                 Votes = result.VoteCount
             };
 
@@ -447,7 +447,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             // Ratings
             series.Ratings = new Ratings
             {
-                Value = (decimal)show.VoteAverage,
+                Value = Math.Round((decimal)show.VoteAverage, 1),
                 Votes = show.VoteCount
             };
 
@@ -544,7 +544,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             // Ratings
             episode.Ratings = new Ratings
             {
-                Value = (decimal)tmdbEpisode.VoteAverage,
+                Value = Math.Round((decimal)tmdbEpisode.VoteAverage, 1),
                 Votes = tmdbEpisode.VoteCount
             };
 
