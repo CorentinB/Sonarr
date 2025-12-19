@@ -47,7 +47,7 @@ namespace Sonarr.Api.V3.Series
         public NewItemMonitorTypes MonitorNewItems { get; set; }
 
         public bool UseSceneNumbering { get; set; }
-        public bool PreferTmdb { get; set; }
+        public MetadataSource MetadataSource { get; set; }
         public int Runtime { get; set; }
         public int TvdbId { get; set; }
         public int TvRageId { get; set; }
@@ -121,7 +121,7 @@ namespace Sonarr.Api.V3.Series
                        MonitorNewItems = model.MonitorNewItems,
 
                        UseSceneNumbering = model.UseSceneNumbering,
-                       PreferTmdb = model.PreferTmdb,
+                       MetadataSource = model.MetadataSource,
                        Runtime = model.Runtime,
                        TvdbId = model.TvdbId,
                        TvRageId = model.TvRageId,
@@ -187,7 +187,7 @@ namespace Sonarr.Api.V3.Series
                        MonitorNewItems = resource.MonitorNewItems,
 
                        UseSceneNumbering = resource.UseSceneNumbering,
-                       PreferTmdb = resource.PreferTmdb,
+                       MetadataSource = resource.MetadataSource,
                        Runtime = resource.Runtime,
                        TvdbId = resource.TvdbId,
                        TvRageId = resource.TvRageId,

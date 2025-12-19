@@ -53,7 +53,7 @@ function EditSeriesModalContent({
     seriesType,
     path,
     tags,
-    preferTmdb,
+    metadataSource,
     rootFolderPath: initialRootFolderPath,
   } = series;
 
@@ -81,7 +81,7 @@ function EditSeriesModalContent({
         seriesType,
         path,
         tags,
-        preferTmdb,
+        metadataSource,
       },
       pendingChanges,
       saveError
@@ -94,7 +94,7 @@ function EditSeriesModalContent({
     seriesType,
     path,
     tags,
-    preferTmdb,
+    metadataSource,
     pendingChanges,
     saveError,
   ]);
@@ -272,13 +272,17 @@ function EditSeriesModalContent({
           </FormGroup>
 
           <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('PreferTmdb')}</FormLabel>
+            <FormLabel>{translate('MetadataSource')}</FormLabel>
 
             <FormInputGroup
-              type={inputTypes.CHECK}
-              name="preferTmdb"
-              helpText={translate('PreferTmdbHelpText')}
-              {...settings.preferTmdb}
+              type={inputTypes.SELECT}
+              name="metadataSource"
+              values={[
+                { key: 'tvdb', value: 'TheTVDB' },
+                { key: 'tmdb', value: 'TheMovieDB' },
+              ]}
+              helpText={translate('MetadataSourceHelpText')}
+              {...settings.metadataSource}
               onChange={handleInputChange}
             />
           </FormGroup>

@@ -57,9 +57,9 @@ namespace Sonarr.Api.V3.Series
                     series.SeasonFolder = resource.SeasonFolder.Value;
                 }
 
-                if (resource.PreferTmdb.HasValue)
+                if (resource.MetadataSource.HasValue)
                 {
-                    series.PreferTmdb = resource.PreferTmdb.Value;
+                    series.MetadataSource = resource.MetadataSource.Value;
                 }
 
                 if (resource.RootFolderPath.IsNotNullOrWhiteSpace())

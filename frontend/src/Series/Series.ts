@@ -19,6 +19,8 @@ export type SeriesStatus = 'continuing' | 'ended' | 'upcoming' | 'deleted';
 
 export type MonitorNewItems = 'all' | 'none';
 
+export type MetadataSource = 'tvdb' | 'tmdb';
+
 export type CoverType = 'poster' | 'banner' | 'fanart' | 'season';
 
 export interface Image {
@@ -100,7 +102,7 @@ interface Series extends ModelBase {
   tvRageId: number;
   tmdbId: number;
   useSceneNumbering: boolean;
-  preferTmdb: boolean;
+  metadataSource: MetadataSource;
   year: number;
   addOptions: SeriesAddOptions;
 }

@@ -37,7 +37,7 @@ namespace NzbDrone.Core.MetadataSource
         // Used for search (new series) - checks global default setting
         private bool UseTmdbForNewSeries => _configService.TmdbDefaultForNewShows && IsTmdbConfigured;
 
-        // Used for existing series refresh - checks per-series preference
+        // Used for existing series refresh - checks per-series metadata source setting
         private bool ShouldUseTmdb(Series existingSeries)
         {
             if (existingSeries == null)
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.MetadataSource
                 return false;
             }
 
-            return existingSeries.PreferTmdb && IsTmdbConfigured;
+            return existingSeries.MetadataSource == MetadataSource.Tmdb && IsTmdbConfigured;
         }
 
         public Tuple<Series, List<Episode>> GetSeriesInfo(int tvdbSeriesId)

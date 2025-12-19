@@ -187,7 +187,7 @@ namespace NzbDrone.Core.Tv
             // Apply TMDB default for new series if configured
             if (_configService.TmdbDefaultForNewShows && _configService.TmdbApiKey.IsNotNullOrWhiteSpace())
             {
-                newSeries.PreferTmdb = true;
+                newSeries.MetadataSource = MetadataSource.Tmdb;
             }
 
             if (newSeries.AddOptions != null && newSeries.AddOptions.Monitor == MonitorTypes.None)

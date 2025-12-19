@@ -11,7 +11,7 @@ namespace Sonarr.Api.V3.Series
         public int? QualityProfileId { get; set; }
         public SeriesTypes? SeriesType { get; set; }
         public bool? SeasonFolder { get; set; }
-        public bool? PreferTmdb { get; set; }
+        public MetadataSource? MetadataSource { get; set; }
         public string RootFolderPath { get; set; }
         public List<int> Tags { get; set; }
         public ApplyTags ApplyTags { get; set; }
