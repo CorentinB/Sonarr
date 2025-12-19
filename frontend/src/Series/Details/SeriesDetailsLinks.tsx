@@ -15,31 +15,35 @@ function SeriesDetailsLinks(props: SeriesDetailsLinksProps) {
 
   return (
     <div className={styles.links}>
-      <Link
-        className={styles.link}
-        to={`https://www.thetvdb.com/?tab=series&id=${tvdbId}`}
-      >
-        <Label
-          className={styles.linkLabel}
-          kind={kinds.INFO}
-          size={sizes.LARGE}
-        >
-          The TVDB
-        </Label>
-      </Link>
+      {tvdbId ? (
+        <>
+          <Link
+            className={styles.link}
+            to={`https://www.thetvdb.com/?tab=series&id=${tvdbId}`}
+          >
+            <Label
+              className={styles.linkLabel}
+              kind={kinds.INFO}
+              size={sizes.LARGE}
+            >
+              The TVDB
+            </Label>
+          </Link>
 
-      <Link
-        className={styles.link}
-        to={`https://trakt.tv/search/tvdb/${tvdbId}?id_type=show`}
-      >
-        <Label
-          className={styles.linkLabel}
-          kind={kinds.INFO}
-          size={sizes.LARGE}
-        >
-          Trakt
-        </Label>
-      </Link>
+          <Link
+            className={styles.link}
+            to={`https://trakt.tv/search/tvdb/${tvdbId}?id_type=show`}
+          >
+            <Label
+              className={styles.linkLabel}
+              kind={kinds.INFO}
+              size={sizes.LARGE}
+            >
+              Trakt
+            </Label>
+          </Link>
+        </>
+      ) : null}
 
       {tvMazeId ? (
         <Link

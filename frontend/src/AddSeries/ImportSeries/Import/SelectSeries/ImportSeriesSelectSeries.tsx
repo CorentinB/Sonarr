@@ -96,10 +96,15 @@ function ImportSeriesSelectSeries({
   }, [id, term, dispatch]);
 
   const handleSeriesSelect = useCallback(
-    (tvdbId: number) => {
+    (tvdbId: number, tmdbId: number | undefined) => {
       setIsOpen(false);
 
-      const selectedSeries = items.find((item) => item.tvdbId === tvdbId)!;
+      // Find by tmdbId first (for TMDB results), then fall back to tvdbId
+      const selectedSeries = items.find(
+        (item) =>
+          (tmdbId && item.tmdbId === tmdbId) ||
+          (tvdbId && item.tvdbId === tvdbId)
+      )!;
 
       dispatch(
         // @ts-expect-error - actions are not typed
@@ -236,8 +241,9 @@ function ImportSeriesSelectSeries({
                   {items.map((item) => {
                     return (
                       <ImportSeriesSearchResult
-                        key={item.tvdbId}
+                        key={item.tmdbId ? `tmdb-${item.tmdbId}` : `tvdb-${item.tvdbId}`}
                         tvdbId={item.tvdbId}
+                        tmdbId={item.tmdbId}
                         title={item.title}
                         year={item.year}
                         network={item.network}

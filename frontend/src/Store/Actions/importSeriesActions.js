@@ -226,8 +226,13 @@ export const actionHandlers = handleThunks({
       const selectedSeries = item.selectedSeries;
 
       // Make sure we have a selected series and
-      // the same series hasn't been added yet.
-      if (selectedSeries && !acc.some((a) => a.tvdbId === selectedSeries.tvdbId)) {
+      // the same series hasn't been added yet (check both tmdbId and tvdbId).
+      const isDuplicate = acc.some((a) =>
+        (selectedSeries.tmdbId && a.tmdbId === selectedSeries.tmdbId) ||
+        (selectedSeries.tvdbId && a.tvdbId === selectedSeries.tvdbId)
+      );
+
+      if (selectedSeries && !isDuplicate) {
         const newSeries = getNewSeries(_.cloneDeep(selectedSeries), item);
         newSeries.path = item.path;
 

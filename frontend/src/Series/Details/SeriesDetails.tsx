@@ -389,6 +389,7 @@ function SeriesDetails({ seriesId }: SeriesDetailsProps) {
     genres,
     tags,
     year,
+    preferTmdb,
   } = series;
 
   const {
@@ -672,6 +673,20 @@ function SeriesDetails({ seriesId }: SeriesDetailsProps) {
                       <Icon name={statusDetails.icon} size={17} />
                       <span className={styles.statusName}>
                         {statusDetails.title}
+                      </span>
+                    </div>
+                  </Label>
+
+                  <Label
+                    className={styles.detailsLabel}
+                    title={translate('MetadataSource')}
+                    size={sizes.LARGE}
+                    kind={preferTmdb ? kinds.PURPLE : kinds.INFO}
+                  >
+                    <div>
+                      <Icon name={icons.INFO} size={17} />
+                      <span className={styles.statusName}>
+                        {preferTmdb ? 'TMDB' : 'TVDB'}
                       </span>
                     </div>
                   </Label>

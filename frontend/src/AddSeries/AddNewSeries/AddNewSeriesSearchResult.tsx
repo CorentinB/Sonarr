@@ -100,17 +100,31 @@ function AddNewSeriesSearchResult({ series }: AddNewSeriesSearchResultProps) {
                 />
               ) : null}
 
-              <Link
-                className={styles.tvdbLink}
-                to={`https://www.thetvdb.com/?tab=series&id=${tvdbId}`}
-                onPress={handleTvdbLinkPress}
-              >
-                <Icon
-                  className={styles.tvdbLinkIcon}
-                  name={icons.EXTERNAL_LINK}
-                  size={28}
-                />
-              </Link>
+              {tvdbId ? (
+                <Link
+                  className={styles.tvdbLink}
+                  to={`https://www.thetvdb.com/?tab=series&id=${tvdbId}`}
+                  onPress={handleTvdbLinkPress}
+                >
+                  <Icon
+                    className={styles.tvdbLinkIcon}
+                    name={icons.EXTERNAL_LINK}
+                    size={28}
+                  />
+                </Link>
+              ) : tmdbId ? (
+                <Link
+                  className={styles.tvdbLink}
+                  to={`https://www.themoviedb.org/tv/${tmdbId}`}
+                  onPress={handleTvdbLinkPress}
+                >
+                  <Icon
+                    className={styles.tvdbLinkIcon}
+                    name={icons.EXTERNAL_LINK}
+                    size={28}
+                  />
+                </Link>
+              ) : null}
             </div>
           </div>
 

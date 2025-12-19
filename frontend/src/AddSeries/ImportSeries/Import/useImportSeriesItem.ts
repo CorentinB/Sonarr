@@ -17,9 +17,11 @@ function useImportSeriesItem(id: string) {
     const selectedSeries = item && item.selectedSeries;
     const isExistingSeries =
       !!selectedSeries &&
-      series.some((s) => {
-        return s.tvdbId === selectedSeries.tvdbId;
-      });
+      series.some(
+        (s) =>
+          (selectedSeries.tmdbId && s.tmdbId === selectedSeries.tmdbId) ||
+          (selectedSeries.tvdbId && s.tvdbId === selectedSeries.tvdbId)
+      );
 
     return {
       ...item,

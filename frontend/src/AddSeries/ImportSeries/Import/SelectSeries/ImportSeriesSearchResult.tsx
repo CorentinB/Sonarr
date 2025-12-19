@@ -8,24 +8,26 @@ import styles from './ImportSeriesSearchResult.css';
 
 interface ImportSeriesSearchResultProps {
   tvdbId: number;
+  tmdbId?: number;
   title: string;
   year: number;
   network?: string;
-  onPress: (tvdbId: number) => void;
+  onPress: (tvdbId: number, tmdbId: number | undefined) => void;
 }
 
 function ImportSeriesSearchResult({
   tvdbId,
+  tmdbId,
   title,
   year,
   network,
   onPress,
 }: ImportSeriesSearchResultProps) {
-  const isExistingSeries = useExistingSeries(tvdbId, undefined);
+  const isExistingSeries = useExistingSeries(tvdbId, tmdbId);
 
   const handlePress = useCallback(() => {
-    onPress(tvdbId);
-  }, [tvdbId, onPress]);
+    onPress(tvdbId, tmdbId);
+  }, [tvdbId, tmdbId, onPress]);
 
   return (
     <div className={styles.container}>
@@ -38,16 +40,18 @@ function ImportSeriesSearchResult({
         />
       </Link>
 
-      <Link
-        className={styles.tvdbLink}
-        to={`https://www.thetvdb.com/?tab=series&id=${tvdbId}`}
-      >
-        <Icon
-          className={styles.tvdbLinkIcon}
-          name={icons.EXTERNAL_LINK}
-          size={16}
-        />
-      </Link>
+      {tvdbId ? (
+        <Link
+          className={styles.tvdbLink}
+          to={`https://www.thetvdb.com/?tab=series&id=${tvdbId}`}
+        >
+          <Icon
+            className={styles.tvdbLinkIcon}
+            name={icons.EXTERNAL_LINK}
+            size={16}
+          />
+        </Link>
+      ) : null}
     </div>
   );
 }

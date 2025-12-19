@@ -93,7 +93,10 @@ function AddNewSeries() {
           <div className={styles.searchResults}>
             {data.map((item) => {
               return (
-                <AddNewSeriesSearchResult key={item.tvdbId} series={item} />
+                <AddNewSeriesSearchResult
+                  key={item.tmdbId ? `tmdb-${item.tmdbId}` : `tvdb-${item.tvdbId}`}
+                  series={item}
+                />
               );
             })}
           </div>

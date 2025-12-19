@@ -153,7 +153,11 @@ function ImportSeriesTable({
 
       const isExistingSeries =
         !!selectedSeries &&
-        allSeries.some((s) => s.tvdbId === selectedSeries.tvdbId);
+        allSeries.some(
+          (s) =>
+            (selectedSeries.tmdbId && s.tmdbId === selectedSeries.tmdbId) ||
+            (selectedSeries.tvdbId && s.tvdbId === selectedSeries.tvdbId)
+        );
 
       if (
         (!selectedSeries && prevItem.selectedSeries) ||
