@@ -45,7 +45,7 @@ namespace NzbDrone.Core.MetadataSource
                 return false;
             }
 
-            return existingSeries.MetadataSource == MetadataSource.Tmdb && IsTmdbConfigured;
+            return existingSeries.MetadataSource == Tv.MetadataSource.Tmdb && IsTmdbConfigured;
         }
 
         public Tuple<Series, List<Episode>> GetSeriesInfo(int tvdbSeriesId)
