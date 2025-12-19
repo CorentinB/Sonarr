@@ -9,7 +9,10 @@ interface AddSeriesPayload
   extends AddSeries,
     Omit<
       AddSeriesOptions,
-      'monitor' | 'searchForMissingEpisodes' | 'searchForCutoffUnmetEpisodes'
+      | 'monitor'
+      | 'searchForMissingEpisodes'
+      | 'searchForCutoffUnmetEpisodes'
+      | 'metadataSource'
     > {}
 
 export const useLookupSeries = (query: string) => {

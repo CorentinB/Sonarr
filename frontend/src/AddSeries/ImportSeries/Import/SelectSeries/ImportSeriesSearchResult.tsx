@@ -7,12 +7,12 @@ import ImportSeriesTitle from './ImportSeriesTitle';
 import styles from './ImportSeriesSearchResult.css';
 
 interface ImportSeriesSearchResultProps {
-  tvdbId: number;
+  tvdbId?: number;
   tmdbId?: number;
   title: string;
   year: number;
   network?: string;
-  onPress: (tvdbId: number, tmdbId: number | undefined) => void;
+  onPress: (tvdbId: number | undefined, tmdbId: number | undefined) => void;
 }
 
 function ImportSeriesSearchResult({

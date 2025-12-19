@@ -171,7 +171,7 @@ function SelectSeriesModalContent(props: SelectSeriesModalContentProps) {
       sortedSeries.filter(
         (item) =>
           item.title.toLowerCase().includes(filter.toLowerCase()) ||
-          item.tvdbId.toString().includes(filter) ||
+          item.tvdbId?.toString().includes(filter) ||
           item.imdbId?.includes(filter)
       ),
     [sortedSeries, filter]

@@ -5,7 +5,7 @@ import styles from './SelectSeriesRow.css';
 
 interface SelectSeriesRowProps {
   title: string;
-  tvdbId: number;
+  tvdbId?: number;
   imdbId?: string;
   year: number;
 }
@@ -25,7 +25,7 @@ function SelectSeriesRow({
       <VirtualTableRowCell className={styles.year}>{year}</VirtualTableRowCell>
 
       <VirtualTableRowCell className={styles.tvdbId}>
-        <Label>{tvdbId}</Label>
+        {tvdbId ? <Label>{tvdbId}</Label> : null}
       </VirtualTableRowCell>
 
       <VirtualTableRowCell className={styles.imdbId}>

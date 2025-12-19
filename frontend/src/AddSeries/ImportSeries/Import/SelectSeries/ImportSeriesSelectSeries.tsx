@@ -96,7 +96,7 @@ function ImportSeriesSelectSeries({
   }, [id, term, dispatch]);
 
   const handleSeriesSelect = useCallback(
-    (tvdbId: number, tmdbId: number | undefined) => {
+    (tvdbId: number | undefined, tmdbId: number | undefined) => {
       setIsOpen(false);
 
       // Find by tmdbId first (for TMDB results), then fall back to tvdbId
