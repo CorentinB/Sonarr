@@ -2080,6 +2080,7 @@
   "Title": "Title",
   "Titles": "Titles",
   "TMDB": "TMDB",
+  "TheMovieDB": "TheMovieDB",
   "TmdbApiKey": "TMDB API Key (v3)",
   "TmdbApiKeyHelpText": "Get your free API key from themoviedb.org/settings/api",
   "TmdbDefaultForNewShows": "Use TMDB for New Series",

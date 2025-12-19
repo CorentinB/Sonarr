@@ -97,10 +97,10 @@ interface Series extends ModelBase {
   tags: number[];
   title: string;
   titleSlug: string;
-  tvdbId: number;
+  tvdbId?: number;
   tvMazeId: number;
   tvRageId: number;
-  tmdbId: number;
+  tmdbId?: number;
   useSceneNumbering: boolean;
   metadataSource: MetadataSource;
   year: number;

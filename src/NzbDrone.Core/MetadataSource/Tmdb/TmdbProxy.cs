@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
@@ -27,6 +28,10 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
 
     public class TmdbProxy : ITmdbProxy
     {
+        private const int MaxActorsToImport = 15;
+        private const int MaxRetries = 3;
+        private const int BaseRetryDelayMs = 1000;
+
         private readonly IHttpClient _httpClient;
         private readonly ITmdbRequestBuilder _requestBuilder;
         private readonly ISeriesService _seriesService;
@@ -47,6 +52,61 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
         }
 
         public bool IsConfigured => _requestBuilder.IsConfigured;
+
+        private HttpResponse<T> ExecuteWithRetry<T>(HttpRequest request, string operationDescription)
+            where T : new()
+        {
+            var lastException = default(Exception);
+
+            for (var attempt = 0; attempt < MaxRetries; attempt++)
+            {
+                try
+                {
+                    var response = _httpClient.Get<T>(request);
+
+                    if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                    {
+                        var delay = BaseRetryDelayMs * (int)Math.Pow(2, attempt);
+                        _logger.Warn("TMDB rate limit hit for {0}, waiting {1}ms before retry (attempt {2}/{3})",
+                            operationDescription, delay, attempt + 1, MaxRetries);
+                        Thread.Sleep(delay);
+                        continue;
+                    }
+
+                    return response;
+                }
+                catch (HttpException ex) when (ex.Response?.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    var delay = BaseRetryDelayMs * (int)Math.Pow(2, attempt);
+                    _logger.Warn("TMDB rate limit hit for {0}, waiting {1}ms before retry (attempt {2}/{3})",
+                        operationDescription, delay, attempt + 1, MaxRetries);
+                    Thread.Sleep(delay);
+                    lastException = ex;
+                }
+            }
+
+            throw new TmdbException($"TMDB rate limit exceeded after {MaxRetries} retries for {operationDescription}", lastException);
+        }
+
+        private static DateTime? TryParseTmdbDate(string dateString)
+        {
+            if (dateString.IsNullOrWhiteSpace())
+            {
+                return null;
+            }
+
+            if (DateTime.TryParseExact(
+                dateString,
+                "yyyy-MM-dd",
+                DateTimeFormatInfo.InvariantInfo,
+                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                out var parsed))
+            {
+                return parsed;
+            }
+
+            return null;
+        }
 
         public int? FindTmdbIdByTvdbId(int tvdbId)
         {
@@ -92,6 +152,11 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
 
         public Tuple<Series, List<Episode>> GetSeriesInfo(int tmdbId)
         {
+            if (tmdbId <= 0)
+            {
+                throw new ArgumentException($"Invalid TMDB ID: {tmdbId}", nameof(tmdbId));
+            }
+
             try
             {
                 var httpRequest = _requestBuilder.Create()
@@ -102,7 +167,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                 httpRequest.AllowAutoRedirect = true;
                 httpRequest.SuppressHttpError = true;
 
-                var httpResponse = _httpClient.Get<TmdbTvShowResource>(httpRequest);
+                var httpResponse = ExecuteWithRetry<TmdbTvShowResource>(httpRequest, $"GetSeriesInfo({tmdbId})");
 
                 if (httpResponse.HasHttpError)
                 {
@@ -115,14 +180,35 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                 }
 
                 var show = httpResponse.Resource;
+
+                if (show == null)
+                {
+                    throw new TmdbException($"TMDB returned empty response for series ID {tmdbId}");
+                }
+
                 var series = MapSeries(show);
 
                 // Fetch episodes for each season
                 var episodes = new List<Episode>();
+                var failedSeasons = new List<int>();
+
                 foreach (var season in show.Seasons ?? new List<TmdbSeasonSummaryResource>())
                 {
                     var seasonEpisodes = GetSeasonEpisodes(tmdbId, season.SeasonNumber);
-                    episodes.AddRange(seasonEpisodes);
+                    if (seasonEpisodes == null)
+                    {
+                        failedSeasons.Add(season.SeasonNumber);
+                    }
+                    else
+                    {
+                        episodes.AddRange(seasonEpisodes);
+                    }
+                }
+
+                if (failedSeasons.Any())
+                {
+                    _logger.Warn("Failed to fetch episodes for {0} season(s) of TMDB ID {1}: {2}",
+                        failedSeasons.Count, tmdbId, string.Join(", ", failedSeasons));
                 }
 
                 return new Tuple<Series, List<Episode>>(series, episodes);
@@ -154,25 +240,35 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                 httpRequest.AllowAutoRedirect = true;
                 httpRequest.SuppressHttpError = true;
 
-                var httpResponse = _httpClient.Get<TmdbSeasonResource>(httpRequest);
+                var httpResponse = ExecuteWithRetry<TmdbSeasonResource>(httpRequest, $"GetSeasonEpisodes({tmdbId}, S{seasonNumber})");
 
                 if (httpResponse.HasHttpError)
                 {
-                    _logger.Warn("Failed to get season {0} for TMDB ID {1}: {2}", seasonNumber, tmdbId, httpResponse.StatusCode);
-                    return new List<Episode>();
+                    _logger.Error("Failed to get season {0} for TMDB ID {1}: HTTP {2}", seasonNumber, tmdbId, httpResponse.StatusCode);
+                    return null;
                 }
 
                 return httpResponse.Resource?.Episodes?.Select(MapEpisode).ToList() ?? new List<Episode>();
             }
+            catch (TmdbException ex)
+            {
+                _logger.Error(ex, "Failed to get season {0} for TMDB ID {1} after retries", seasonNumber, tmdbId);
+                return null;
+            }
             catch (Exception ex)
             {
-                _logger.Warn(ex, "Failed to get season {0} for TMDB ID {1}", seasonNumber, tmdbId);
-                return new List<Episode>();
+                _logger.Error(ex, "Unexpected error getting season {0} for TMDB ID {1}", seasonNumber, tmdbId);
+                return null;
             }
         }
 
         public List<Series> SearchForNewSeries(string title)
         {
+            if (title.IsNullOrWhiteSpace())
+            {
+                throw new ArgumentException("Search title cannot be empty", nameof(title));
+            }
+
             try
             {
                 var httpRequest = _requestBuilder.Create()
@@ -183,7 +279,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                 httpRequest.AllowAutoRedirect = true;
                 httpRequest.SuppressHttpError = true;
 
-                var httpResponse = _httpClient.Get<TmdbSearchResultResource>(httpRequest);
+                var httpResponse = ExecuteWithRetry<TmdbSearchResultResource>(httpRequest, $"SearchForNewSeries('{title}')");
 
                 if (httpResponse.HasHttpError)
                 {
@@ -236,18 +332,11 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                 ? IsoLanguages.Find(result.OriginalLanguage.ToLower())?.Language ?? Language.English
                 : Language.English;
 
-            if (result.FirstAirDate.IsNotNullOrWhiteSpace())
+            var firstAired = TryParseTmdbDate(result.FirstAirDate);
+            if (firstAired.HasValue)
             {
-                if (DateTime.TryParseExact(
-                    result.FirstAirDate,
-                    "yyyy-MM-dd",
-                    DateTimeFormatInfo.InvariantInfo,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-                    out var firstAired))
-                {
-                    series.FirstAired = firstAired;
-                    series.Year = firstAired.Year;
-                }
+                series.FirstAired = firstAired.Value;
+                series.Year = firstAired.Value.Year;
             }
 
             series.Ratings = new Ratings
@@ -273,6 +362,11 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
 
         private Series MapSeries(TmdbTvShowResource show)
         {
+            if (show == null)
+            {
+                throw new ArgumentNullException(nameof(show));
+            }
+
             var series = new Series
             {
                 TmdbId = show.Id,
@@ -306,32 +400,18 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                 : Language.English;
 
             // First aired date
-            if (show.FirstAirDate.IsNotNullOrWhiteSpace())
+            var firstAired = TryParseTmdbDate(show.FirstAirDate);
+            if (firstAired.HasValue)
             {
-                if (DateTime.TryParseExact(
-                    show.FirstAirDate,
-                    "yyyy-MM-dd",
-                    DateTimeFormatInfo.InvariantInfo,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-                    out var firstAired))
-                {
-                    series.FirstAired = firstAired;
-                    series.Year = firstAired.Year;
-                }
+                series.FirstAired = firstAired.Value;
+                series.Year = firstAired.Value.Year;
             }
 
             // Last aired date
-            if (show.LastAirDate.IsNotNullOrWhiteSpace())
+            var lastAired = TryParseTmdbDate(show.LastAirDate);
+            if (lastAired.HasValue)
             {
-                if (DateTime.TryParseExact(
-                    show.LastAirDate,
-                    "yyyy-MM-dd",
-                    DateTimeFormatInfo.InvariantInfo,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-                    out var lastAired))
-                {
-                    series.LastAired = lastAired;
-                }
+                series.LastAired = lastAired.Value;
             }
 
             // Runtime
@@ -343,7 +423,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             // Network
             if (show.Networks != null && show.Networks.Count > 0)
             {
-                series.Network = show.Networks.First().Name;
+                series.Network = show.Networks.First()?.Name ?? string.Empty;
             }
 
             // Status
@@ -400,7 +480,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
 
             return credits.Cast
                 .OrderBy(c => c.Order)
-                .Take(15)
+                .Take(MaxActorsToImport)
                 .Select(c => new Actor
                 {
                     Name = c.Name,
@@ -443,17 +523,10 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             };
 
             // Parse air date to UTC
-            if (tmdbEpisode.AirDate.IsNotNullOrWhiteSpace())
+            var airDateUtc = TryParseTmdbDate(tmdbEpisode.AirDate);
+            if (airDateUtc.HasValue)
             {
-                if (DateTime.TryParseExact(
-                    tmdbEpisode.AirDate,
-                    "yyyy-MM-dd",
-                    DateTimeFormatInfo.InvariantInfo,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-                    out var airDateUtc))
-                {
-                    episode.AirDateUtc = airDateUtc;
-                }
+                episode.AirDateUtc = airDateUtc.Value;
             }
 
             // Ratings
@@ -478,22 +551,29 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             return episode;
         }
 
-        private static SeriesStatusType MapSeriesStatus(string status)
+        private SeriesStatusType MapSeriesStatus(string status)
         {
             if (status.IsNullOrWhiteSpace())
             {
                 return SeriesStatusType.Continuing;
             }
 
-            return status.ToLowerInvariant() switch
+            var lowerStatus = status.ToLowerInvariant();
+            return lowerStatus switch
             {
                 "ended" => SeriesStatusType.Ended,
                 "canceled" => SeriesStatusType.Ended,
                 "returning series" => SeriesStatusType.Continuing,
                 "in production" => SeriesStatusType.Continuing,
                 "planned" => SeriesStatusType.Upcoming,
-                _ => SeriesStatusType.Continuing
+                _ => LogUnknownStatusAndReturnDefault(status)
             };
+        }
+
+        private SeriesStatusType LogUnknownStatusAndReturnDefault(string status)
+        {
+            _logger.Debug("Unknown TMDB series status '{0}', defaulting to Continuing", status);
+            return SeriesStatusType.Continuing;
         }
 
         private static string MapEpisodeType(string episodeType)

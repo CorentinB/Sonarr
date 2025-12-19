@@ -278,8 +278,8 @@ function EditSeriesModalContent({
               type={inputTypes.SELECT}
               name="metadataSource"
               values={[
-                { key: 'tvdb', value: 'TheTVDB' },
-                { key: 'tmdb', value: 'TheMovieDB' },
+                { key: 'tvdb', value: translate('TheTvdb') },
+                { key: 'tmdb', value: translate('TheMovieDB') },
               ]}
               helpText={translate('MetadataSourceHelpText')}
               {...settings.metadataSource}

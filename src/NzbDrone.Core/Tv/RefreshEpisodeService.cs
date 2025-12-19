@@ -168,9 +168,10 @@ namespace NzbDrone.Core.Tv
 
             if (oldEpisodes.Any())
             {
+                var seriesId = series.TvdbId > 0 ? series.TvdbId : series.TmdbId;
                 if (hasExisting)
                 {
-                    _logger.Warn("Show {0} ({1}) had {2} old episodes appear, please check monitored status.", series.TvdbId, series.Title, oldEpisodes.Count);
+                    _logger.Warn("Show {0} ({1}) had {2} old episodes appear, please check monitored status.", seriesId, series.Title, oldEpisodes.Count);
                 }
                 else
                 {
@@ -184,7 +185,7 @@ namespace NzbDrone.Core.Tv
                         }
                     }
 
-                    _logger.Warn("Show {0} ({1}) had {2} old episodes appear, unmonitored aired episodes to prevent unexpected downloads.", series.TvdbId, series.Title, oldEpisodes.Count);
+                    _logger.Warn("Show {0} ({1}) had {2} old episodes appear, unmonitored aired episodes to prevent unexpected downloads.", seriesId, series.Title, oldEpisodes.Count);
                 }
             }
         }

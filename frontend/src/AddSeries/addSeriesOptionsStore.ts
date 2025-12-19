@@ -1,5 +1,5 @@
 import { createOptionsStore } from 'Helpers/Hooks/useOptionsStore';
-import { SeriesMonitor, SeriesType } from 'Series/Series';
+import { MetadataSource, SeriesMonitor, SeriesType } from 'Series/Series';
 
 export interface AddSeriesOptions {
   rootFolderPath: string;
@@ -10,6 +10,7 @@ export interface AddSeriesOptions {
   searchForMissingEpisodes: boolean;
   searchForCutoffUnmetEpisodes: boolean;
   tags: number[];
+  metadataSource?: MetadataSource;
 }
 
 const { useOptions, useOption, setOption } =
@@ -23,6 +24,7 @@ const { useOptions, useOption, setOption } =
       searchForMissingEpisodes: false,
       searchForCutoffUnmetEpisodes: false,
       tags: [],
+      metadataSource: undefined,
     };
   });
 

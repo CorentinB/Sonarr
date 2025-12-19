@@ -30,6 +30,11 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
         {
             var apiKey = _configService.TmdbApiKey;
 
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new InvalidOperationException("TMDB API key is not configured. Please set your TMDB API key in Settings > Metadata Source.");
+            }
+
             return new HttpRequestBuilder(BaseUrl)
                 .AddQueryParam("api_key", apiKey);
         }

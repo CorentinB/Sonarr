@@ -9,6 +9,7 @@ function TheTvdb() {
       <img
         className={styles.image}
         src={`${window.Sonarr.urlBase}/Content/Images/thetvdb.png`}
+        alt="TheTVDB"
       />
 
       <div className={styles.info}>
