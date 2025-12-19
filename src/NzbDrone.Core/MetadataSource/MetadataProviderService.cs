@@ -63,7 +63,7 @@ namespace NzbDrone.Core.MetadataSource
                     _logger.Debug("Fetching series info from TMDB for {0} (TVDB ID {1})", existingSeries.Title, tvdbSeriesId);
 
                     // Use existing TmdbId if available, otherwise look it up
-                    int? tmdbId = existingSeries.TmdbId > 0
+                    var tmdbId = existingSeries.TmdbId > 0
                         ? existingSeries.TmdbId
                         : _tmdbProxy.FindTmdbIdByTvdbId(tvdbSeriesId);
 
@@ -76,8 +76,11 @@ namespace NzbDrone.Core.MetadataSource
 
                         if (currentSeasonCount != tmdbSeasonCount)
                         {
-                            _logger.Warn("Season count mismatch for {0}: current {1}, TMDB {2}. Using SkyHook to prevent file mismatches.",
-                                existingSeries.Title, currentSeasonCount, tmdbSeasonCount);
+                            _logger.Warn(
+                                "Season count mismatch for {0}: current {1}, TMDB {2}. Using SkyHook to prevent file mismatches.",
+                                existingSeries.Title,
+                                currentSeasonCount,
+                                tmdbSeasonCount);
                             return _skyHookProxy.GetSeriesInfo(tvdbSeriesId);
                         }
 

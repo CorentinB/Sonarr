@@ -46,7 +46,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             _logger = logger;
         }
 
-        public bool IsConfigured => _requestBuilder.IsConfigured && _configService.TmdbEnabled;
+        public bool IsConfigured => _requestBuilder.IsConfigured;
 
         public int? FindTmdbIdByTvdbId(int tvdbId)
         {
@@ -238,8 +238,12 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
 
             if (result.FirstAirDate.IsNotNullOrWhiteSpace())
             {
-                if (DateTime.TryParseExact(result.FirstAirDate, "yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var firstAired))
+                if (DateTime.TryParseExact(
+                    result.FirstAirDate,
+                    "yyyy-MM-dd",
+                    DateTimeFormatInfo.InvariantInfo,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out var firstAired))
                 {
                     series.FirstAired = firstAired;
                     series.Year = firstAired.Year;
@@ -304,8 +308,12 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             // First aired date
             if (show.FirstAirDate.IsNotNullOrWhiteSpace())
             {
-                if (DateTime.TryParseExact(show.FirstAirDate, "yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var firstAired))
+                if (DateTime.TryParseExact(
+                    show.FirstAirDate,
+                    "yyyy-MM-dd",
+                    DateTimeFormatInfo.InvariantInfo,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out var firstAired))
                 {
                     series.FirstAired = firstAired;
                     series.Year = firstAired.Year;
@@ -315,8 +323,12 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             // Last aired date
             if (show.LastAirDate.IsNotNullOrWhiteSpace())
             {
-                if (DateTime.TryParseExact(show.LastAirDate, "yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var lastAired))
+                if (DateTime.TryParseExact(
+                    show.LastAirDate,
+                    "yyyy-MM-dd",
+                    DateTimeFormatInfo.InvariantInfo,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out var lastAired))
                 {
                     series.LastAired = lastAired;
                 }
@@ -433,8 +445,12 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             // Parse air date to UTC
             if (tmdbEpisode.AirDate.IsNotNullOrWhiteSpace())
             {
-                if (DateTime.TryParseExact(tmdbEpisode.AirDate, "yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var airDateUtc))
+                if (DateTime.TryParseExact(
+                    tmdbEpisode.AirDate,
+                    "yyyy-MM-dd",
+                    DateTimeFormatInfo.InvariantInfo,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out var airDateUtc))
                 {
                     episode.AirDateUtc = airDateUtc;
                 }
