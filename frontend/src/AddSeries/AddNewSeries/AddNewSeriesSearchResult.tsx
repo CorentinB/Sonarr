@@ -23,7 +23,6 @@ function AddNewSeriesSearchResult({ series }: AddNewSeriesSearchResultProps) {
   const {
     tvdbId,
     tmdbId,
-    titleSlug,
     title,
     year,
     network,

@@ -34,6 +34,7 @@ namespace NzbDrone.Core.DataAugmentation.Scene
         private readonly Logger _logger;
         private readonly ICachedDictionary<List<SceneMapping>> _getTvdbIdCache;
         private readonly ICachedDictionary<List<SceneMapping>> _findByTvdbIdCache;
+        private readonly ICachedDictionary<List<SceneMapping>> _findByTmdbIdCache;
         private bool _updatedAfterStartup;
 
         public SceneMappingService(ISceneMappingRepository repository,
@@ -49,6 +50,7 @@ namespace NzbDrone.Core.DataAugmentation.Scene
 
             _getTvdbIdCache = cacheManager.GetCacheDictionary<List<SceneMapping>>(GetType(), "tvdb_id");
             _findByTvdbIdCache = cacheManager.GetCacheDictionary<List<SceneMapping>>(GetType(), "find_tvdb_id");
+            _findByTmdbIdCache = cacheManager.GetCacheDictionary<List<SceneMapping>>(GetType(), "find_tmdb_id");
         }
 
         public List<string> GetSceneNames(int tvdbId, List<int> seasonNumbers, List<int> sceneSeasonNumbers)
@@ -84,6 +86,23 @@ namespace NzbDrone.Core.DataAugmentation.Scene
             }
 
             var mappings = _findByTvdbIdCache.Find(tvdbId.ToString());
+
+            if (mappings == null)
+            {
+                return new List<SceneMapping>();
+            }
+
+            return mappings;
+        }
+
+        public List<SceneMapping> FindByTmdbId(int tmdbId)
+        {
+            if (_findByTmdbIdCache.Count == 0)
+            {
+                RefreshCache();
+            }
+
+            var mappings = _findByTmdbIdCache.Find(tmdbId.ToString());
 
             if (mappings == null)
             {
@@ -226,6 +245,7 @@ namespace NzbDrone.Core.DataAugmentation.Scene
 
             _getTvdbIdCache.Update(mappings.GroupBy(v => v.ParseTerm).ToDictionary(v => v.Key, v => v.ToList()));
             _findByTvdbIdCache.Update(mappings.GroupBy(v => v.TvdbId).ToDictionary(v => v.Key.ToString(), v => v.ToList()));
+            _findByTmdbIdCache.Update(mappings.Where(v => v.TmdbId > 0).GroupBy(v => v.TmdbId).ToDictionary(v => v.Key.ToString(), v => v.ToList()));
         }
 
         private List<SceneMapping> FilterSceneMappings(List<SceneMapping> candidates, string releaseTitle)
