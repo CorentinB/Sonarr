@@ -10,7 +10,7 @@ import { icons, kinds, sizes } from 'Helpers/Props';
 import { Statistics } from 'Series/Series';
 import SeriesGenres from 'Series/SeriesGenres';
 import SeriesPoster from 'Series/SeriesPoster';
-import useExistingSeries from 'Series/useExistingSeries';
+import { useFindExistingSeries } from 'Series/useExistingSeries';
 import translate from 'Utilities/String/translate';
 import AddNewSeriesModal from './AddNewSeriesModal';
 import styles from './AddNewSeriesSearchResult.css';
@@ -37,7 +37,8 @@ function AddNewSeriesSearchResult({ series }: AddNewSeriesSearchResultProps) {
     images,
   } = series;
 
-  const isExistingSeries = useExistingSeries(tvdbId, tmdbId);
+  const existingSeries = useFindExistingSeries(tvdbId, tmdbId);
+  const isExistingSeries = existingSeries != null;
   const isSmallScreen = useAppDimension('isSmallScreen');
   const [isNewAddSeriesModalOpen, setIsNewAddSeriesModalOpen] = useState(false);
 
@@ -55,7 +56,7 @@ function AddNewSeriesSearchResult({ series }: AddNewSeriesSearchResultProps) {
   }, []);
 
   const linkProps = isExistingSeries
-    ? { to: `/series/${titleSlug}` }
+    ? { to: `/series/${existingSeries.titleSlug}` }
     : { onPress: handlePress };
   let seasons = translate('OneSeason');
 
