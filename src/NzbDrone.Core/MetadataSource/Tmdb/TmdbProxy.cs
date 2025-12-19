@@ -67,8 +67,12 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                     if (response.StatusCode == HttpStatusCode.TooManyRequests)
                     {
                         var delay = BaseRetryDelayMs * (int)Math.Pow(2, attempt);
-                        _logger.Warn("TMDB rate limit hit for {0}, waiting {1}ms before retry (attempt {2}/{3})",
-                            operationDescription, delay, attempt + 1, MaxRetries);
+                        _logger.Warn(
+                            "TMDB rate limit hit for {0}, waiting {1}ms before retry (attempt {2}/{3})",
+                            operationDescription,
+                            delay,
+                            attempt + 1,
+                            MaxRetries);
                         Thread.Sleep(delay);
                         continue;
                     }
@@ -78,8 +82,12 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                 catch (HttpException ex) when (ex.Response?.StatusCode == HttpStatusCode.TooManyRequests)
                 {
                     var delay = BaseRetryDelayMs * (int)Math.Pow(2, attempt);
-                    _logger.Warn("TMDB rate limit hit for {0}, waiting {1}ms before retry (attempt {2}/{3})",
-                        operationDescription, delay, attempt + 1, MaxRetries);
+                    _logger.Warn(
+                        "TMDB rate limit hit for {0}, waiting {1}ms before retry (attempt {2}/{3})",
+                        operationDescription,
+                        delay,
+                        attempt + 1,
+                        MaxRetries);
                     Thread.Sleep(delay);
                     lastException = ex;
                 }
@@ -207,8 +215,11 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
 
                 if (failedSeasons.Any())
                 {
-                    _logger.Warn("Failed to fetch episodes for {0} season(s) of TMDB ID {1}: {2}",
-                        failedSeasons.Count, tmdbId, string.Join(", ", failedSeasons));
+                    _logger.Warn(
+                        "Failed to fetch episodes for {0} season(s) of TMDB ID {1}: {2}",
+                        failedSeasons.Count,
+                        tmdbId,
+                        string.Join(", ", failedSeasons));
                 }
 
                 return new Tuple<Series, List<Episode>>(series, episodes);

@@ -1859,7 +1859,7 @@
   "ScriptPath": "Script Path",
   "Search": "Search",
   "SearchAll": "Search All",
-  "SearchByTvdbId": "You can also search using TVDB ID of a show. eg. tvdb:71663",
+  "SearchByTvdbId": "You can also search using TVDB or TMDB ID of a show. eg. tvdb:71663 or tmdb:1396",
   "SearchFailedError": "Search failed, please try again later.",
   "SearchForAllMissingEpisodes": "Search for all missing episodes",
   "SearchForAllMissingEpisodesConfirmationCount": "Are you sure you want to search for all {totalRecords} missing episodes?",

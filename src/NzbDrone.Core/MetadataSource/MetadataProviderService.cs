@@ -129,6 +129,21 @@ namespace NzbDrone.Core.MetadataSource
 
         public List<Series> SearchForNewSeries(string title)
         {
+            var lowerTitle = title.ToLowerInvariant();
+
+            // Handle tmdb: prefix for direct TMDB ID lookup
+            if (lowerTitle.StartsWith("tmdb:") || lowerTitle.StartsWith("tmdbid:"))
+            {
+                var slug = lowerTitle.Split(':')[1].Trim();
+
+                if (slug.IsNullOrWhiteSpace() || slug.Any(char.IsWhiteSpace) || !int.TryParse(slug, out var tmdbId) || tmdbId <= 0)
+                {
+                    return new List<Series>();
+                }
+
+                return SearchForNewSeriesByTmdbId(tmdbId);
+            }
+
             if (UseTmdbForNewSeries)
             {
                 try

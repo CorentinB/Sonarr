@@ -1,3 +1,4 @@
+using System;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
 
