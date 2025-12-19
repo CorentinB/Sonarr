@@ -103,7 +103,16 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
             .SetValidator(qualityProfileExistsValidator);
 
         PostValidator.RuleFor(s => s.Title).NotEmpty();
-        PostValidator.RuleFor(s => s.TvdbId).GreaterThan(0).SetValidator(seriesExistsValidator);
+
+        // Allow either TvdbId OR TmdbId (for TMDB search results which only have TmdbId)
+        PostValidator.RuleFor(s => s)
+            .Must(s => s.TvdbId > 0 || s.TmdbId > 0)
+            .WithMessage("Either TvdbId or TmdbId must be provided");
+
+        // Only validate series exists when TvdbId is provided
+        PostValidator.RuleFor(s => s.TvdbId)
+            .SetValidator(seriesExistsValidator)
+            .When(s => s.TvdbId > 0);
     }
 
     [HttpGet]

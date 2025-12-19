@@ -10,6 +10,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource;
+using NzbDrone.Core.MetadataSource.Tmdb;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Parser;
 
@@ -25,6 +26,7 @@ namespace NzbDrone.Core.Tv
     {
         private readonly ISeriesService _seriesService;
         private readonly IProvideSeriesInfo _seriesInfo;
+        private readonly ITmdbProxy _tmdbProxy;
         private readonly IBuildFileNames _fileNameBuilder;
         private readonly IAddSeriesValidator _addSeriesValidator;
         private readonly IConfigService _configService;
@@ -32,6 +34,7 @@ namespace NzbDrone.Core.Tv
 
         public AddSeriesService(ISeriesService seriesService,
                                 IProvideSeriesInfo seriesInfo,
+                                ITmdbProxy tmdbProxy,
                                 IBuildFileNames fileNameBuilder,
                                 IAddSeriesValidator addSeriesValidator,
                                 IConfigService configService,
@@ -39,6 +42,7 @@ namespace NzbDrone.Core.Tv
         {
             _seriesService = seriesService;
             _seriesInfo = seriesInfo;
+            _tmdbProxy = tmdbProxy;
             _fileNameBuilder = fileNameBuilder;
             _addSeriesValidator = addSeriesValidator;
             _configService = configService;
@@ -121,15 +125,40 @@ namespace NzbDrone.Core.Tv
 
             try
             {
-                tuple = _seriesInfo.GetSeriesInfo(newSeries.TvdbId);
+                // Handle TMDB-only series (from TMDB search results which only have TmdbId)
+                if (newSeries.TvdbId <= 0 && newSeries.TmdbId > 0)
+                {
+                    _logger.Debug("Fetching series info from TMDB for TmdbId {0}", newSeries.TmdbId);
+                    tuple = _tmdbProxy.GetSeriesInfo(newSeries.TmdbId);
+                }
+                else
+                {
+                    tuple = _seriesInfo.GetSeriesInfo(newSeries.TvdbId);
+                }
             }
             catch (SeriesNotFoundException)
             {
-                _logger.Error("Series {0} with TVDB ID {1} was not found, it may have been removed from TheTVDB. Path: {2}", newSeries, newSeries.TvdbId, newSeries.Path);
+                var idType = newSeries.TvdbId > 0 ? "TVDB" : "TMDB";
+                var idValue = newSeries.TvdbId > 0 ? newSeries.TvdbId : newSeries.TmdbId;
+                _logger.Error(
+                    "Series {0} with {1} ID {2} was not found. Path: {3}",
+                    newSeries,
+                    idType,
+                    idValue,
+                    newSeries.Path);
 
                 throw new ValidationException(new List<ValidationFailure>
                                               {
-                                                  new ValidationFailure("TvdbId", $"A series with this ID was not found. Path: {newSeries.Path}", newSeries.TvdbId)
+                                                  new ValidationFailure(idType + "Id", $"A series with this ID was not found. Path: {newSeries.Path}", idValue)
+                                              });
+            }
+            catch (TmdbException ex)
+            {
+                _logger.Error(ex, "TMDB lookup failed for series {0} with TmdbId {1}. Path: {2}", newSeries, newSeries.TmdbId, newSeries.Path);
+
+                throw new ValidationException(new List<ValidationFailure>
+                                              {
+                                                  new ValidationFailure("TmdbId", $"TMDB lookup failed: {ex.Message}. Path: {newSeries.Path}", newSeries.TmdbId)
                                               });
             }
 
