@@ -220,7 +220,7 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
     [HttpPut("{id}/season")]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public ActionResult<SeasonResource> UpdateSeasonMonitored([FromRoute] int id, [FromBody] SeasonResource seasonResource)
+    public ActionResult<SeriesResource> UpdateSeasonMonitored([FromRoute] int id, [FromBody] SeasonResource seasonResource)
     {
         lock (_seriesLockPool.GetLock(id))
         {
@@ -236,9 +236,10 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
 
             _seriesService.UpdateSeries(series);
 
-            BroadcastResourceChange(ModelAction.Updated, series.ToResource());
+            var resource = series.ToResource();
+            BroadcastResourceChange(ModelAction.Updated, resource);
 
-            return season.ToResource();
+            return resource;
         }
     }
 

@@ -56,6 +56,21 @@ namespace NzbDrone.Core.MetadataSource
 
         public Tuple<Series, List<Episode>> GetSeriesInfo(int tvdbSeriesId, Series existingSeries)
         {
+            // Handle TMDB-only series (TvdbId = 0, TmdbId > 0)
+            // These must use TMDB - cannot fall back to SkyHook
+            var isTmdbOnlySeries = tvdbSeriesId <= 0 && existingSeries?.TmdbId > 0;
+
+            if (isTmdbOnlySeries && IsTmdbConfigured)
+            {
+                _logger.Debug("Fetching TMDB-only series info from TMDB for {0} (TMDB ID {1})", existingSeries.Title, existingSeries.TmdbId);
+                return _tmdbProxy.GetSeriesInfo(existingSeries.TmdbId);
+            }
+
+            if (isTmdbOnlySeries && !IsTmdbConfigured)
+            {
+                throw new InvalidOperationException($"Cannot refresh TMDB-only series '{existingSeries?.Title}' without TMDB API key configured");
+            }
+
             if (ShouldUseTmdb(existingSeries))
             {
                 try

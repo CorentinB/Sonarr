@@ -67,6 +67,7 @@ namespace NzbDrone.Core.Tv
             var added = DateTime.UtcNow;
             var seriesToAdd = new List<Series>();
             var existingSeriesTvdbIds = _seriesService.AllSeriesTvdbIds();
+            var existingSeriesTmdbIds = _seriesService.AllSeriesTmdbIds();
 
             foreach (var s in newSeries)
             {
@@ -86,16 +87,30 @@ namespace NzbDrone.Core.Tv
                     series.Added = added;
 
                     // Only check for duplicate TvdbId if it's a real TVDB ID (> 0)
-                    // TvdbId = 0 means TMDB-only series, which can have duplicates
+                    // TvdbId = 0 means TMDB-only series
                     if (series.TvdbId > 0 && existingSeriesTvdbIds.Any(f => f == series.TvdbId))
                     {
                         _logger.Debug("TVDB ID {0} was not added due to validation failure: Series {1} already exists in database", s.TvdbId, s);
                         continue;
                     }
 
+                    // Check for duplicate TmdbId for TMDB-only series (TvdbId = 0)
+                    if (series.TvdbId == 0 && series.TmdbId > 0 && existingSeriesTmdbIds.Any(f => f == series.TmdbId))
+                    {
+                        _logger.Debug("TMDB ID {0} was not added due to validation failure: Series {1} already exists in database", series.TmdbId, s);
+                        continue;
+                    }
+
                     if (series.TvdbId > 0 && seriesToAdd.Any(f => f.TvdbId == series.TvdbId))
                     {
                         _logger.Trace("TVDB ID {0} was already added from another import list, not adding series {1} again", s.TvdbId, s);
+                        continue;
+                    }
+
+                    // Check for duplicate TmdbId in series being added (TMDB-only series)
+                    if (series.TvdbId == 0 && series.TmdbId > 0 && seriesToAdd.Any(f => f.TvdbId == 0 && f.TmdbId == series.TmdbId))
+                    {
+                        _logger.Trace("TMDB ID {0} was already added from another import list, not adding series {1} again", series.TmdbId, s);
                         continue;
                     }
 
@@ -187,8 +202,14 @@ namespace NzbDrone.Core.Tv
             newSeries.SortTitle = SeriesTitleNormalizer.Normalize(newSeries.Title, newSeries.TvdbId);
             newSeries.Added = DateTime.UtcNow;
 
-            // Apply TMDB default for new series if configured
-            if (_configService.TmdbDefaultForNewShows && _configService.TmdbApiKey.IsNotNullOrWhiteSpace())
+            // Set metadata source:
+            // - TMDB-only series (no TVDB ID) must use TMDB
+            // - Otherwise use TMDB if configured as default
+            if (newSeries.TvdbId <= 0 && newSeries.TmdbId > 0)
+            {
+                newSeries.MetadataSource = MetadataSource.Tmdb;
+            }
+            else if (_configService.TmdbDefaultForNewShows && _configService.TmdbApiKey.IsNotNullOrWhiteSpace())
             {
                 newSeries.MetadataSource = MetadataSource.Tmdb;
             }

@@ -228,7 +228,13 @@ namespace NzbDrone.Core.Tv
                     }
                     catch (SeriesNotFoundException)
                     {
-                        _logger.Error("Series '{0}' (tvdbid {1}) was not found, it may have been removed from TheTVDB.", series.Title, series.TvdbId);
+                        var source = series.TvdbId > 0 ? "TheTVDB" : "TMDB";
+                        var id = series.TvdbId > 0 ? series.TvdbId : series.TmdbId;
+                        _logger.Error("Series '{0}' (ID {1}) was not found, it may have been removed from {2}.", series.Title, id, source);
+                    }
+                    catch (InvalidOperationException ex) when (ex.Message.Contains("TMDB-only"))
+                    {
+                        _logger.Error(ex, "Cannot refresh TMDB-only series '{0}' - TMDB API key is not configured", series.Title);
                     }
                     catch (Exception e)
                     {
@@ -254,7 +260,14 @@ namespace NzbDrone.Core.Tv
                         }
                         catch (SeriesNotFoundException)
                         {
-                            _logger.Error("Series '{0}' (tvdbid {1}) was not found, it may have been removed from TheTVDB.", seriesLocal.Title, seriesLocal.TvdbId);
+                            var source = seriesLocal.TvdbId > 0 ? "TheTVDB" : "TMDB";
+                            var id = seriesLocal.TvdbId > 0 ? seriesLocal.TvdbId : seriesLocal.TmdbId;
+                            _logger.Error("Series '{0}' (ID {1}) was not found, it may have been removed from {2}.", seriesLocal.Title, id, source);
+                            continue;
+                        }
+                        catch (InvalidOperationException ex) when (ex.Message.Contains("TMDB-only"))
+                        {
+                            _logger.Error(ex, "Cannot refresh TMDB-only series '{0}' - TMDB API key is not configured", seriesLocal.Title);
                             continue;
                         }
                         catch (Exception e)
