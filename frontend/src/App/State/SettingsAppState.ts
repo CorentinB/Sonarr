@@ -30,6 +30,7 @@ import NamingExample from 'typings/Settings/NamingExample';
 import ReleaseProfile from 'typings/Settings/ReleaseProfile';
 import RemotePathMapping from 'typings/Settings/RemotePathMapping';
 import UiSettings from 'typings/Settings/UiSettings';
+import MetadataSourceSettings from 'typings/Settings/MetadataSourceSettings';
 import MetadataAppState from './MetadataAppState';
 
 type Presets<T> = T & {
@@ -158,6 +159,10 @@ export type IndexerFlagSettingsAppState = AppSectionState<IndexerFlag>;
 export type LanguageSettingsAppState = AppSectionState<Language>;
 export type UiSettingsAppState = AppSectionItemState<UiSettings>;
 
+export interface MetadataSourceAppState
+  extends AppSectionItemState<MetadataSourceSettings>,
+    AppSectionSaveState {}
+
 interface SettingsAppState {
   advancedSettings: boolean;
   autoTaggings: AutoTaggingAppState;
@@ -177,6 +182,7 @@ interface SettingsAppState {
   languages: LanguageSettingsAppState;
   mediaManagement: MediaManagementAppState;
   metadata: MetadataAppState;
+  metadataSource: MetadataSourceAppState;
   naming: NamingAppState;
   namingExamples: NamingExamplesAppState;
   notifications: NotificationAppState;

@@ -77,8 +77,7 @@ function MetadataSourceSettings() {
             <TheTvdb />
 
             <Tmdb
-              tmdbDefaultForNewShows={settings.tmdbDefaultForNewShows}
-              tmdbApiKey={settings.tmdbApiKey}
+              settings={settings}
               onInputChange={handleInputChange}
             />
           </Form>

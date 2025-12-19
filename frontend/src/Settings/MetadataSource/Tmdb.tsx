@@ -6,26 +6,19 @@ import FormLabel from 'Components/Form/FormLabel';
 import InlineMarkdown from 'Components/Markdown/InlineMarkdown';
 import { inputTypes, sizes } from 'Helpers/Props';
 import { InputChanged } from 'typings/inputs';
+import { PendingSection } from 'typings/pending';
+import MetadataSourceSettings from 'typings/Settings/MetadataSourceSettings';
 import translate from 'Utilities/String/translate';
 import styles from './Tmdb.css';
 
-interface TmdbSetting {
-  value: string | boolean;
-  errors?: { message: string }[];
-  warnings?: { message: string }[];
-}
-
 interface TmdbProps {
-  tmdbDefaultForNewShows: TmdbSetting;
-  tmdbApiKey: TmdbSetting;
+  settings: PendingSection<MetadataSourceSettings>;
   onInputChange: (change: InputChanged) => void;
 }
 
-function Tmdb({
-  tmdbDefaultForNewShows,
-  tmdbApiKey,
-  onInputChange,
-}: TmdbProps) {
+function Tmdb({ settings, onInputChange }: TmdbProps) {
+  const { tmdbApiKey, tmdbDefaultForNewShows } = settings;
+
   return (
     <FieldSet legend={translate('TMDB')}>
       <div className={styles.container}>
