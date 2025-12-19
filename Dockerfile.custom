@@ -1,0 +1,25 @@
+# Custom Sonarr with TMDB support
+# Based on linuxserver/sonarr base image
+
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20
+
+# Install runtime dependencies
+RUN apk add --no-cache icu-libs sqlite-libs
+
+# Copy built application (from GitHub Actions artifact)
+COPY _artifacts/linux-musl-x64/net10.0/Sonarr /app
+
+# Set permissions
+RUN chmod +x /app/Sonarr
+
+# Sonarr default port
+EXPOSE 8989
+
+# Volume for config
+VOLUME /config
+
+# Set environment
+ENV XDG_CONFIG_HOME=/config/xdg
+
+# Start Sonarr
+ENTRYPOINT ["/app/Sonarr", "-nobrowser", "-data=/config"]

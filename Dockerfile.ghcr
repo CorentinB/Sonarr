@@ -1,0 +1,40 @@
+# Sonarr with TMDB Support
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20
+
+LABEL maintainer="CorentinB"
+LABEL org.opencontainers.image.description="Sonarr with TMDB metadata source support"
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    icu-libs \
+    sqlite-libs \
+    libmediainfo \
+    tzdata
+
+# Copy built application
+COPY _artifacts/Sonarr /app
+
+# Set permissions
+RUN chmod +x /app/Sonarr && \
+    chmod +x /app/Sonarr.Update/Sonarr.Update
+
+# Create config directory
+RUN mkdir -p /config
+
+# Sonarr port
+EXPOSE 8989
+
+# Volumes
+VOLUME ["/config", "/tv", "/downloads"]
+
+# Environment
+ENV HOME=/config \
+    XDG_CONFIG_HOME=/config/xdg \
+    SONARR_BRANCH=tmdb-support
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget -q --spider http://localhost:8989/ping || exit 1
+
+# Start Sonarr
+ENTRYPOINT ["/app/Sonarr", "-nobrowser", "-data=/config"]

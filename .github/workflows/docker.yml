@@ -1,0 +1,76 @@
+name: Build Docker Image
+
+on:
+  push:
+    branches:
+      - tmdb-support
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+
+      - name: Setup Node.js
+        uses: volta-cli/action@v4
+
+      - name: Build Frontend
+        run: |
+          yarn install
+          yarn build --env production
+
+      - name: Build Backend
+        run: |
+          dotnet msbuild -restore src/Sonarr.sln \
+            -p:SelfContained=true \
+            -p:Configuration=Release \
+            -p:Platform=Posix \
+            -p:RuntimeIdentifiers=linux-musl-x64 \
+            -t:PublishAllRids
+
+      - name: Prepare artifacts
+        run: |
+          mkdir -p _artifacts/Sonarr
+          cp -r _output/net10.0/linux-musl-x64/publish/* _artifacts/Sonarr/
+          cp -r _output/Sonarr.Update/net10.0/linux-musl-x64/publish _artifacts/Sonarr/Sonarr.Update
+          cp -r _output/UI _artifacts/Sonarr/
+          rm -f _artifacts/Sonarr/Sonarr.Windows.*
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=
+            latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.ghcr
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
