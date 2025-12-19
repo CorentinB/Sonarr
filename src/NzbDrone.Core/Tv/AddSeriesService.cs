@@ -63,6 +63,12 @@ namespace NzbDrone.Core.Tv
             _logger.Info("Adding Series {0} Path: [{1}]", newSeries, newSeries.Path);
             _seriesService.AddSeries(newSeries);
 
+            // Store TMDB alternate titles for TMDB-only series
+            if (newSeries.TmdbId > 0 && newSeries.TvdbId <= 0)
+            {
+                StoreTmdbAlternateTitles(newSeries);
+            }
+
             return newSeries;
         }
 
@@ -138,7 +144,15 @@ namespace NzbDrone.Core.Tv
                 }
             }
 
-            return _seriesService.AddSeries(seriesToAdd);
+            var addedSeries = _seriesService.AddSeries(seriesToAdd);
+
+            // Store TMDB alternate titles for TMDB-only series
+            foreach (var series in addedSeries.Where(s => s.TmdbId > 0 && s.TvdbId <= 0))
+            {
+                StoreTmdbAlternateTitles(series);
+            }
+
+            return addedSeries;
         }
 
         private Series AddSkyhookData(Series newSeries)
@@ -231,6 +245,44 @@ namespace NzbDrone.Core.Tv
             }
 
             return newSeries;
+        }
+
+        private void StoreTmdbAlternateTitles(Series series)
+        {
+            try
+            {
+                if (!_tmdbProxy.IsConfigured)
+                {
+                    return;
+                }
+
+                var alternateTitles = _tmdbProxy.GetAlternateTitles(series.TmdbId);
+
+                if (alternateTitles == null || alternateTitles.Count == 0)
+                {
+                    _logger.Debug("No alternate titles found for TMDB ID {0}", series.TmdbId);
+                    return;
+                }
+
+                _logger.Info("Storing {0} alternate title(s) for series '{1}' (TMDB ID: {2})", alternateTitles.Count, series.Title, series.TmdbId);
+
+                var sceneMappings = alternateTitles.Select(title => new SceneMapping
+                {
+                    Title = title,
+                    ParseTerm = title.CleanSeriesTitle(),
+                    SearchTerm = title,
+                    TvdbId = 0,
+                    TmdbId = series.TmdbId,
+                    SceneOrigin = "tmdb",
+                    Type = "TmdbAlternateTitle"
+                }).ToList();
+
+                _sceneMappingRepository.InsertMany(sceneMappings);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Failed to store TMDB alternate titles for series '{0}' (TMDB ID: {1})", series.Title, series.TmdbId);
+            }
         }
     }
 }
