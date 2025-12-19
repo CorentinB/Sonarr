@@ -18,6 +18,7 @@ import indexers from './Settings/indexers';
 import languages from './Settings/languages';
 import mediaManagement from './Settings/mediaManagement';
 import metadata from './Settings/metadata';
+import metadataSource from './Settings/metadataSource';
 import naming from './Settings/naming';
 import namingExamples from './Settings/namingExamples';
 import notifications from './Settings/notifications';
@@ -44,6 +45,7 @@ export * from './Settings/indexers';
 export * from './Settings/languages';
 export * from './Settings/mediaManagement';
 export * from './Settings/metadata';
+export * from './Settings/metadataSource';
 export * from './Settings/naming';
 export * from './Settings/namingExamples';
 export * from './Settings/notifications';
@@ -80,6 +82,7 @@ export const defaultState = {
   languages: languages.defaultState,
   mediaManagement: mediaManagement.defaultState,
   metadata: metadata.defaultState,
+  metadataSource: metadataSource.defaultState,
   naming: naming.defaultState,
   namingExamples: namingExamples.defaultState,
   notifications: notifications.defaultState,
@@ -126,6 +129,7 @@ export const actionHandlers = handleThunks({
   ...languages.actionHandlers,
   ...mediaManagement.actionHandlers,
   ...metadata.actionHandlers,
+  ...metadataSource.actionHandlers,
   ...naming.actionHandlers,
   ...namingExamples.actionHandlers,
   ...notifications.actionHandlers,
@@ -162,6 +166,7 @@ export const reducers = createHandleActions({
   ...languages.reducers,
   ...mediaManagement.reducers,
   ...metadata.reducers,
+  ...metadataSource.reducers,
   ...naming.reducers,
   ...namingExamples.reducers,
   ...notifications.reducers,

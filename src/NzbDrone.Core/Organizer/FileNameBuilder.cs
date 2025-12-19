@@ -720,6 +720,9 @@ namespace NzbDrone.Core.Organizer
             tokenHandlers["{TvdbId}"] = m => series.TvdbId.ToString();
             tokenHandlers["{TvMazeId}"] = m => series.TvMazeId > 0 ? series.TvMazeId.ToString() : string.Empty;
             tokenHandlers["{TmdbId}"] = m => series.TmdbId > 0 ? series.TmdbId.ToString() : string.Empty;
+
+            // Plex-compatible format: {tmdb-12345}
+            tokenHandlers["{PlexTmdbId}"] = m => series.TmdbId > 0 ? "{tmdb-" + series.TmdbId + "}" : string.Empty;
         }
 
         private string GetCustomFormatsToken(List<CustomFormat> customFormats, string filter)

@@ -404,6 +404,18 @@ namespace NzbDrone.Core.Configuration
 
         public bool ProxyBypassLocalAddresses => GetValueBoolean("ProxyBypassLocalAddresses", true);
 
+        public string TmdbApiKey
+        {
+            get { return GetValue("TmdbApiKey", string.Empty); }
+            set { SetValue("TmdbApiKey", value); }
+        }
+
+        public bool TmdbDefaultForNewShows
+        {
+            get { return GetValueBoolean("TmdbDefaultForNewShows", false); }
+            set { SetValue("TmdbDefaultForNewShows", value); }
+        }
+
         public string BackupFolder => GetValue("BackupFolder", "Backups");
 
         public int BackupInterval => GetValueInt("BackupInterval", 7);

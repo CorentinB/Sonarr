@@ -93,6 +93,10 @@ namespace NzbDrone.Core.Configuration
         string ProxyBypassFilter { get; }
         bool ProxyBypassLocalAddresses { get; }
 
+        // Metadata Source
+        string TmdbApiKey { get; set; }
+        bool TmdbDefaultForNewShows { get; set; }
+
         // Backups
         string BackupFolder { get; }
         int BackupInterval { get; }

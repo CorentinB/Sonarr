@@ -100,6 +100,7 @@ interface Series extends ModelBase {
   tvRageId: number;
   tmdbId: number;
   useSceneNumbering: boolean;
+  preferTmdb: boolean;
   year: number;
   addOptions: SeriesAddOptions;
 }

@@ -7,6 +7,7 @@ using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Organizer;
@@ -26,18 +27,21 @@ namespace NzbDrone.Core.Tv
         private readonly IProvideSeriesInfo _seriesInfo;
         private readonly IBuildFileNames _fileNameBuilder;
         private readonly IAddSeriesValidator _addSeriesValidator;
+        private readonly IConfigService _configService;
         private readonly Logger _logger;
 
         public AddSeriesService(ISeriesService seriesService,
                                 IProvideSeriesInfo seriesInfo,
                                 IBuildFileNames fileNameBuilder,
                                 IAddSeriesValidator addSeriesValidator,
+                                IConfigService configService,
                                 Logger logger)
         {
             _seriesService = seriesService;
             _seriesInfo = seriesInfo;
             _fileNameBuilder = fileNameBuilder;
             _addSeriesValidator = addSeriesValidator;
+            _configService = configService;
             _logger = logger;
         }
 
@@ -150,6 +154,12 @@ namespace NzbDrone.Core.Tv
             newSeries.CleanTitle = newSeries.Title.CleanSeriesTitle();
             newSeries.SortTitle = SeriesTitleNormalizer.Normalize(newSeries.Title, newSeries.TvdbId);
             newSeries.Added = DateTime.UtcNow;
+
+            // Apply TMDB default for new series if configured
+            if (_configService.TmdbDefaultForNewShows && _configService.TmdbApiKey.IsNotNullOrWhiteSpace())
+            {
+                newSeries.PreferTmdb = true;
+            }
 
             if (newSeries.AddOptions != null && newSeries.AddOptions.Monitor == MonitorTypes.None)
             {

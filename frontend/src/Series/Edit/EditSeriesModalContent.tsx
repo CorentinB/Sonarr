@@ -53,6 +53,7 @@ function EditSeriesModalContent({
     seriesType,
     path,
     tags,
+    preferTmdb,
     rootFolderPath: initialRootFolderPath,
   } = series;
 
@@ -80,6 +81,7 @@ function EditSeriesModalContent({
         seriesType,
         path,
         tags,
+        preferTmdb,
       },
       pendingChanges,
       saveError
@@ -92,6 +94,7 @@ function EditSeriesModalContent({
     seriesType,
     path,
     tags,
+    preferTmdb,
     pendingChanges,
     saveError,
   ]);
@@ -264,6 +267,18 @@ function EditSeriesModalContent({
               type={inputTypes.TAG}
               name="tags"
               {...settings.tags}
+              onChange={handleInputChange}
+            />
+          </FormGroup>
+
+          <FormGroup size={sizes.MEDIUM}>
+            <FormLabel>{translate('PreferTmdb')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="preferTmdb"
+              helpText={translate('PreferTmdbHelpText')}
+              {...settings.preferTmdb}
               onChange={handleInputChange}
             />
           </FormGroup>

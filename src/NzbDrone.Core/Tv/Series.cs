@@ -44,6 +44,7 @@ namespace NzbDrone.Core.Tv
         public SeriesTypes SeriesType { get; set; }
         public string Network { get; set; }
         public bool UseSceneNumbering { get; set; }
+        public bool PreferTmdb { get; set; }
         public string TitleSlug { get; set; }
         public string Path { get; set; }
         public int Year { get; set; }
@@ -83,6 +84,7 @@ namespace NzbDrone.Core.Tv
             RootFolderPath = otherSeries.RootFolderPath;
             Tags = otherSeries.Tags;
             AddOptions = otherSeries.AddOptions;
+            PreferTmdb = otherSeries.PreferTmdb;
         }
     }
 }
