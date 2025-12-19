@@ -79,7 +79,7 @@ namespace Sonarr.Api.V5.Queue
                 DownloadClientHasPostImportCategory = model.DownloadClientHasPostImportCategory,
                 Indexer = model.Indexer,
                 OutputPath = model.OutputPath,
-                EpisodeHasFile = model.Episode?.HasFile ?? false,
+                EpisodeHasFile = model.Episodes?.FirstOrDefault()?.HasFile ?? false,
                 EpisodesWithFilesCount = model.Episodes?.Count(e => e.HasFile) ?? 0,
                 IsFullSeason = model.RemoteEpisode?.ParsedEpisodeInfo?.FullSeason ?? false
             };
