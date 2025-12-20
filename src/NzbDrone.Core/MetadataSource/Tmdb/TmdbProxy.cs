@@ -36,18 +36,21 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
         private readonly IHttpClient _httpClient;
         private readonly ITmdbRequestBuilder _requestBuilder;
         private readonly ISeriesService _seriesService;
+        private readonly IProvideSeriesInfo _seriesInfo;
         private readonly IConfigService _configService;
         private readonly Logger _logger;
 
         public TmdbProxy(IHttpClient httpClient,
                          ITmdbRequestBuilder requestBuilder,
                          ISeriesService seriesService,
+                         IProvideSeriesInfo seriesInfo,
                          IConfigService configService,
                          Logger logger)
         {
             _httpClient = httpClient;
             _requestBuilder = requestBuilder;
             _seriesService = seriesService;
+            _seriesInfo = seriesInfo;
             _configService = configService;
             _logger = logger;
         }
@@ -453,7 +456,10 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             }
 
             series.SortTitle = SeriesTitleNormalizer.Normalize(show.Name, series.TvdbId);
-            series.TitleSlug = GenerateSlug(show.Name, show.Id);
+
+            // Try to use TVDB slug for consistency with Overseerr and other tools
+            // that construct URLs based on TVDB slugs
+            series.TitleSlug = GetTitleSlug(show.Name, show.Id, series.TvdbId);
 
             series.OriginalLanguage = show.OriginalLanguage.IsNotNullOrWhiteSpace()
                 ? IsoLanguages.Find(show.OriginalLanguage.ToLower())?.Language ?? Language.English
@@ -655,6 +661,32 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             }
 
             return $"{_requestBuilder.ImageBaseUrl}{size}{path}";
+        }
+
+        private string GetTitleSlug(string title, int tmdbId, int tvdbId)
+        {
+            // If we have a TVDB ID, try to get the TVDB slug for compatibility
+            // with tools like Overseerr that construct URLs based on TVDB slugs
+            if (tvdbId > 0)
+            {
+                try
+                {
+                    var tvdbSeries = _seriesInfo.GetSeriesInfo(tvdbId);
+                    if (tvdbSeries?.Item1?.TitleSlug.IsNotNullOrWhiteSpace() == true)
+                    {
+                        _logger.Debug("Using TVDB slug '{0}' for TMDB series {1} (TVDB ID: {2})",
+                            tvdbSeries.Item1.TitleSlug, tmdbId, tvdbId);
+                        return tvdbSeries.Item1.TitleSlug;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, "Failed to fetch TVDB slug for series with TVDB ID {0}, using generated slug", tvdbId);
+                }
+            }
+
+            // Fall back to generated slug for TMDB-only series
+            return GenerateSlug(title, tmdbId);
         }
 
         private static string GenerateSlug(string title, int tmdbId)
