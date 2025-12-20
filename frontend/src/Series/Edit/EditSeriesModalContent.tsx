@@ -53,7 +53,7 @@ function EditSeriesModalContent({
     seriesType,
     path,
     tags,
-    metadataSource,
+    metadataSource = 'tvdb',
     rootFolderPath: initialRootFolderPath,
   } = series;
 

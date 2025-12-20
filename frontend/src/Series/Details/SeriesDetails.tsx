@@ -389,7 +389,7 @@ function SeriesDetails({ seriesId }: SeriesDetailsProps) {
     genres,
     tags,
     year,
-    metadataSource,
+    metadataSource = 'tvdb',
   } = series;
 
   const {
