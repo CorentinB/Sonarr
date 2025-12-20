@@ -674,8 +674,11 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
                     var tvdbSeries = _seriesInfo.GetSeriesInfo(tvdbId);
                     if (tvdbSeries?.Item1?.TitleSlug.IsNotNullOrWhiteSpace() == true)
                     {
-                        _logger.Debug("Using TVDB slug '{0}' for TMDB series {1} (TVDB ID: {2})",
-                            tvdbSeries.Item1.TitleSlug, tmdbId, tvdbId);
+                        _logger.Debug(
+                            "Using TVDB slug '{0}' for TMDB series {1} (TVDB ID: {2})",
+                            tvdbSeries.Item1.TitleSlug,
+                            tmdbId,
+                            tvdbId);
                         return tvdbSeries.Item1.TitleSlug;
                     }
                 }
