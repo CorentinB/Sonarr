@@ -47,7 +47,7 @@ namespace Sonarr.Api.V3.Series
         public NewItemMonitorTypes MonitorNewItems { get; set; }
 
         public bool UseSceneNumbering { get; set; }
-        public MetadataSource MetadataSource { get; set; }
+        public MetadataSource? MetadataSource { get; set; }
         public int Runtime { get; set; }
         public int TvdbId { get; set; }
         public int TvRageId { get; set; }
@@ -187,7 +187,7 @@ namespace Sonarr.Api.V3.Series
                        MonitorNewItems = resource.MonitorNewItems,
 
                        UseSceneNumbering = resource.UseSceneNumbering,
-                       MetadataSource = resource.MetadataSource,
+                       MetadataSource = resource.MetadataSource ?? MetadataSource.Tvdb,
                        Runtime = resource.Runtime,
                        TvdbId = resource.TvdbId,
                        TvRageId = resource.TvRageId,
@@ -210,9 +210,18 @@ namespace Sonarr.Api.V3.Series
 
         public static NzbDrone.Core.Tv.Series ToModel(this SeriesResource resource, NzbDrone.Core.Tv.Series series)
         {
+            // Preserve existing MetadataSource if not explicitly provided in the request
+            var existingMetadataSource = series.MetadataSource;
+
             var updatedSeries = resource.ToModel();
 
             series.ApplyChanges(updatedSeries);
+
+            // Restore MetadataSource if it wasn't explicitly set in the request
+            if (!resource.MetadataSource.HasValue)
+            {
+                series.MetadataSource = existingMetadataSource;
+            }
 
             return series;
         }
