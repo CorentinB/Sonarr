@@ -45,6 +45,7 @@ namespace NzbDrone.Core.Tv
         public string Network { get; set; }
         public bool UseSceneNumbering { get; set; }
         public MetadataSource MetadataSource { get; set; }
+        public bool? RenameEpisodes { get; set; }
         public string TitleSlug { get; set; }
         public string Path { get; set; }
         public int Year { get; set; }
@@ -85,6 +86,7 @@ namespace NzbDrone.Core.Tv
             Tags = otherSeries.Tags;
             AddOptions = otherSeries.AddOptions;
             MetadataSource = otherSeries.MetadataSource;
+            RenameEpisodes = otherSeries.RenameEpisodes;
         }
     }
 }

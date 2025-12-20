@@ -54,6 +54,7 @@ function EditSeriesModalContent({
     path,
     tags,
     metadataSource = 'tvdb',
+    renameEpisodes,
     rootFolderPath: initialRootFolderPath,
   } = series;
 
@@ -82,6 +83,7 @@ function EditSeriesModalContent({
         path,
         tags,
         metadataSource,
+        renameEpisodes,
       },
       pendingChanges,
       saveError
@@ -95,6 +97,7 @@ function EditSeriesModalContent({
     path,
     tags,
     metadataSource,
+    renameEpisodes,
     pendingChanges,
     saveError,
   ]);
@@ -103,6 +106,20 @@ function EditSeriesModalContent({
     ({ name, value }: InputChanged) => {
       // @ts-expect-error name needs to be keyof Series
       setPendingChange(name, value);
+    },
+    [setPendingChange]
+  );
+
+  const handleRenameEpisodesChange = useCallback(
+    ({ value }: InputChanged) => {
+      // Convert string value to boolean or null (for "use global setting")
+      let boolValue: boolean | null = null;
+      if (value === 'true') {
+        boolValue = true;
+      } else if (value === 'false') {
+        boolValue = false;
+      }
+      setPendingChange('renameEpisodes', boolValue);
     },
     [setPendingChange]
   );
@@ -284,6 +301,29 @@ function EditSeriesModalContent({
               helpText={translate('MetadataSourceHelpText')}
               {...settings.metadataSource}
               onChange={handleInputChange}
+            />
+          </FormGroup>
+
+          <FormGroup size={sizes.MEDIUM}>
+            <FormLabel>{translate('RenameEpisodes')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.SELECT}
+              name="renameEpisodes"
+              values={[
+                { key: '', value: translate('UseGlobalSetting') },
+                { key: 'true', value: translate('Yes') },
+                { key: 'false', value: translate('No') },
+              ]}
+              helpText={translate('RenameEpisodesSeriesHelpText')}
+              {...settings.renameEpisodes}
+              value={
+                settings.renameEpisodes.value === null ||
+                settings.renameEpisodes.value === undefined
+                  ? ''
+                  : String(settings.renameEpisodes.value)
+              }
+              onChange={handleRenameEpisodesChange}
             />
           </FormGroup>
         </Form>

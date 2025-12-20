@@ -141,7 +141,10 @@ namespace NzbDrone.Core.Organizer
                 namingConfig = _namingConfigService.GetConfig();
             }
 
-            if (!namingConfig.RenameEpisodes)
+            // Use per-series override if set, otherwise use global setting
+            var renameEpisodes = series.RenameEpisodes ?? namingConfig.RenameEpisodes;
+
+            if (!renameEpisodes)
             {
                 return GetOriginalTitle(episodeFile, true) + extension;
             }
@@ -402,7 +405,10 @@ namespace NzbDrone.Core.Organizer
             var namingConfig = _namingConfigService.GetConfig();
             var pattern = namingConfig.StandardEpisodeFormat;
 
-            if (!namingConfig.RenameEpisodes)
+            // Use per-series override if set, otherwise use global setting
+            var renameEpisodes = series.RenameEpisodes ?? namingConfig.RenameEpisodes;
+
+            if (!renameEpisodes)
             {
                 return false;
             }

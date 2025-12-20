@@ -103,6 +103,7 @@ interface Series extends ModelBase {
   tmdbId?: number;
   useSceneNumbering: boolean;
   metadataSource: MetadataSource;
+  renameEpisodes?: boolean;
   year: number;
   addOptions: SeriesAddOptions;
 }

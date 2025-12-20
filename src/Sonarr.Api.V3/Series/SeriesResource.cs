@@ -48,6 +48,7 @@ namespace Sonarr.Api.V3.Series
 
         public bool UseSceneNumbering { get; set; }
         public MetadataSource? MetadataSource { get; set; }
+        public bool? RenameEpisodes { get; set; }
         public int Runtime { get; set; }
         public int TvdbId { get; set; }
         public int TvRageId { get; set; }
@@ -122,6 +123,7 @@ namespace Sonarr.Api.V3.Series
 
                        UseSceneNumbering = model.UseSceneNumbering,
                        MetadataSource = model.MetadataSource,
+                       RenameEpisodes = model.RenameEpisodes,
                        Runtime = model.Runtime,
                        TvdbId = model.TvdbId,
                        TvRageId = model.TvRageId,
@@ -188,6 +190,7 @@ namespace Sonarr.Api.V3.Series
 
                        UseSceneNumbering = resource.UseSceneNumbering,
                        MetadataSource = resource.MetadataSource ?? MetadataSource.Tvdb,
+                       RenameEpisodes = resource.RenameEpisodes,
                        Runtime = resource.Runtime,
                        TvdbId = resource.TvdbId,
                        TvRageId = resource.TvRageId,
