@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Redirect, useHistory, useParams } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 import NotFound from 'Components/NotFound';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import useSeries from 'Series/useSeries';
@@ -11,6 +11,7 @@ function SeriesDetailsPage() {
   const { titleSlug } = useParams<{ titleSlug: string }>();
   const history = useHistory();
 
+  // Try exact match first
   let seriesIndex = allSeries.findIndex(
     (series) => series.titleSlug === titleSlug
   );
@@ -20,18 +21,9 @@ function SeriesDetailsPage() {
   // This handles TMDB-style slugs when accessed via TVDB-style URLs
   if (seriesIndex === -1) {
     const slugPrefix = `${titleSlug}-`;
-    const matchingIndex = allSeries.findIndex((series) =>
+    seriesIndex = allSeries.findIndex((series) =>
       series.titleSlug.startsWith(slugPrefix)
     );
-
-    if (matchingIndex !== -1) {
-      // Redirect to the correct URL
-      return (
-        <Redirect
-          to={`${window.Sonarr.urlBase}/series/${allSeries[matchingIndex].titleSlug}`}
-        />
-      );
-    }
   }
 
   const previousIndex = usePrevious(seriesIndex);
