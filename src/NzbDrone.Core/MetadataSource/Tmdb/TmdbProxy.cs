@@ -11,6 +11,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
+using NzbDrone.Core.MetadataSource.SkyHook;
 using NzbDrone.Core.MetadataSource.Tmdb.Resource;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Tv;
@@ -36,21 +37,21 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
         private readonly IHttpClient _httpClient;
         private readonly ITmdbRequestBuilder _requestBuilder;
         private readonly ISeriesService _seriesService;
-        private readonly IProvideSeriesInfo _seriesInfo;
+        private readonly ISkyHookProxy _skyHookProxy;
         private readonly IConfigService _configService;
         private readonly Logger _logger;
 
         public TmdbProxy(IHttpClient httpClient,
                          ITmdbRequestBuilder requestBuilder,
                          ISeriesService seriesService,
-                         IProvideSeriesInfo seriesInfo,
+                         ISkyHookProxy skyHookProxy,
                          IConfigService configService,
                          Logger logger)
         {
             _httpClient = httpClient;
             _requestBuilder = requestBuilder;
             _seriesService = seriesService;
-            _seriesInfo = seriesInfo;
+            _skyHookProxy = skyHookProxy;
             _configService = configService;
             _logger = logger;
         }
@@ -671,7 +672,7 @@ namespace NzbDrone.Core.MetadataSource.Tmdb
             {
                 try
                 {
-                    var tvdbSeries = _seriesInfo.GetSeriesInfo(tvdbId);
+                    var tvdbSeries = _skyHookProxy.GetSeriesInfo(tvdbId);
                     if (tvdbSeries?.Item1?.TitleSlug.IsNotNullOrWhiteSpace() == true)
                     {
                         _logger.Debug(
