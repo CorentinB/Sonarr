@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useHistory, useParams } from 'react-router';
+import { Redirect, useHistory, useParams } from 'react-router';
 import NotFound from 'Components/NotFound';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import useSeries from 'Series/useSeries';
@@ -26,10 +26,11 @@ function SeriesDetailsPage() {
 
     if (matchingIndex !== -1) {
       // Redirect to the correct URL
-      history.replace(
-        `${window.Sonarr.urlBase}/series/${allSeries[matchingIndex].titleSlug}`
+      return (
+        <Redirect
+          to={`${window.Sonarr.urlBase}/series/${allSeries[matchingIndex].titleSlug}`}
+        />
       );
-      return null;
     }
   }
 
