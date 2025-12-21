@@ -112,8 +112,8 @@ function EditSeriesModalContent({
 
   const handleRenameEpisodesChange = useCallback(
     ({ value }: InputChanged) => {
-      // Convert string value to boolean or null (for "use global setting")
-      let boolValue: boolean | null = null;
+      // Convert string value to boolean or undefined (for "use global setting")
+      let boolValue: boolean | undefined = undefined;
       if (value === 'true') {
         boolValue = true;
       } else if (value === 'false') {
